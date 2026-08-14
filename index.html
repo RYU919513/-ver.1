@@ -64,7 +64,8 @@
       opacity: 0.7;
     }
 
-    .deck-item {
+    .deck-item,
+    .card-item {
       background: #fafafa;
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -72,9 +73,25 @@
       margin-top: 10px;
     }
 
+    .deck-item {
+      cursor: pointer;
+    }
+
     .empty {
       color: #777;
       font-size: 14px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .back-button {
+      background: #666;
+    }
+
+    .count {
+      font-weight: bold;
     }
   </style>
 </head>
@@ -87,40 +104,89 @@
 
   <main>
 
-    <div class="card">
-      <h2>デッキ作成</h2>
-      <p>デッキ名を入力してください。</p>
+    <div id="homeScreen">
 
-      <input
-        id="deckName"
-        type="text"
-        placeholder="例：火自然ボルシャック"
-      >
+      <div class="card">
+        <h2>デッキ作成</h2>
+        <p>デッキ名を入力してください。</p>
 
-      <button onclick="createDeck()">デッキを作成する</button>
+        <input
+          id="deckName"
+          type="text"
+          placeholder="例：火自然ボルシャック"
+        >
+
+        <button onclick="createDeck()">
+          デッキを作成する
+        </button>
+      </div>
+
+      <div class="card">
+        <h2>📚 マイデッキ</h2>
+        <div id="deckList"></div>
+      </div>
+
+      <div class="card">
+        <h2>🤖 AI対戦</h2>
+        <p>今後、AIとの対戦機能を追加予定です。</p>
+        <button disabled>AI対戦（準備中）</button>
+      </div>
+
+      <div class="card">
+        <h2>📊 対戦記録</h2>
+        <p>今後、対戦結果や勝率を記録できるようにします。</p>
+        <button disabled>対戦記録（準備中）</button>
+      </div>
+
     </div>
 
-    <div class="card">
-      <h2>📚 マイデッキ</h2>
-      <div id="deckList"></div>
-    </div>
+    <div id="deckScreen" class="hidden">
 
-    <div class="card">
-      <h2>🤖 AI対戦</h2>
-      <p>今後、AIとの対戦機能を追加予定です。</p>
-      <button disabled>AI対戦（準備中）</button>
-    </div>
+      <div class="card">
+        <button class="back-button" onclick="goHome()">
+          ← マイデッキに戻る
+        </button>
 
-    <div class="card">
-      <h2>📊 対戦記録</h2>
-      <p>今後、対戦結果や勝率を記録できるようにします。</p>
-      <button disabled>対戦記録（準備中）</button>
+        <h2 id="currentDeckName"></h2>
+
+        <p>
+          デッキ枚数：
+          <span id="cardCount" class="count">0</span>
+          / 40枚
+        </p>
+
+        <input
+          id="cardName"
+          type="text"
+          placeholder="カード名を入力"
+        >
+
+        <button onclick="addCard()">
+          カードを追加する
+        </button>
+      </div>
+
+      <div class="card">
+        <h2>🃏 カード一覧</h2>
+        <div id="cardList"></div>
+      </div>
+
     </div>
 
   </main>
 
   <script>
-    let decks = JSON.parse(localStorage.getItem("duelMastersDecks")) || [];
+    let decks =
+      JSON.parse(localStorage.getItem("duelMastersDecks")) || [];
+
+    let currentDeckIndex = null;
+
+    function saveDecks() {
+      localStorage.setItem(
+        "duelMastersDecks",
+        JSON.stringify(decks)
+      );
+    }
 
     function createDeck() {
       const input = document.getElementById("deckName");
@@ -136,7 +202,7 @@
         cards: []
       });
 
-      localStorage.setItem("duelMastersDecks", JSON.stringify(decks));
+      saveDecks();
 
       input.value = "";
       renderDecks();
@@ -144,6 +210,7 @@
 
     function renderDecks() {
       const deckList = document.getElementById("deckList");
+
       deckList.innerHTML = "";
 
       if (decks.length === 0) {
@@ -152,11 +219,113 @@
         return;
       }
 
-      decks.forEach(function(deck) {
+      decks.forEach(function(deck, index) {
         const div = document.createElement("div");
+
         div.className = "deck-item";
-        div.textContent = "🎴 " + deck.name;
+
+        const cardTotal = Array.isArray(deck.cards)
+          ? deck.cards.length
+          : 0;
+
+        div.textContent =
+          "🎴 " + deck.name + "（" + cardTotal + "/40枚）";
+
+        div.onclick = function() {
+          openDeck(index);
+        };
+
         deckList.appendChild(div);
+      });
+    }
+
+    function openDeck(index) {
+      currentDeckIndex = index;
+
+      document.getElementById("homeScreen")
+        .classList.add("hidden");
+
+      document.getElementById("deckScreen")
+        .classList.remove("hidden");
+
+      renderCurrentDeck();
+    }
+
+    function goHome() {
+      currentDeckIndex = null;
+
+      document.getElementById("deckScreen")
+        .classList.add("hidden");
+
+      document.getElementById("homeScreen")
+        .classList.remove("hidden");
+
+      renderDecks();
+    }
+
+    function addCard() {
+      if (currentDeckIndex === null) {
+        return;
+      }
+
+      const input = document.getElementById("cardName");
+      const name = input.value.trim();
+
+      if (name === "") {
+        alert("カード名を入力してください。");
+        return;
+      }
+
+      const deck = decks[currentDeckIndex];
+
+      if (!Array.isArray(deck.cards)) {
+        deck.cards = [];
+      }
+
+      if (deck.cards.length >= 40) {
+        alert("デッキは40枚までです。");
+        return;
+      }
+
+      deck.cards.push(name);
+
+      saveDecks();
+
+      input.value = "";
+      renderCurrentDeck();
+    }
+
+    function renderCurrentDeck() {
+      const deck = decks[currentDeckIndex];
+
+      if (!Array.isArray(deck.cards)) {
+        deck.cards = [];
+      }
+
+      document.getElementById("currentDeckName")
+        .textContent = "🎴 " + deck.name;
+
+      document.getElementById("cardCount")
+        .textContent = deck.cards.length;
+
+      const cardList = document.getElementById("cardList");
+
+      cardList.innerHTML = "";
+
+      if (deck.cards.length === 0) {
+        cardList.innerHTML =
+          '<p class="empty">まだカードが登録されていません。</p>';
+        return;
+      }
+
+      deck.cards.forEach(function(cardName, index) {
+        const div = document.createElement("div");
+
+        div.className = "card-item";
+        div.textContent =
+          (index + 1) + ". " + cardName;
+
+        cardList.appendChild(div);
       });
     }
 
