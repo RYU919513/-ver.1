@@ -1024,7 +1024,25 @@
         });
         db.close();
         cardDatabase = cards;
-      } catch (err) {
+      try {
+  const response = await fetch("cards.json");
+
+  if (response.ok) {
+    const jsonCards = await response.json();
+
+    jsonCards.forEach(card => {
+      const exists = cardDatabase.some(
+        savedCard => savedCard.id === card.id
+      );
+
+      if (!exists) {
+        cardDatabase.push(card);
+      }
+    });
+  }
+} catch (error) {
+  console.log("cards.jsonの読み込みをスキップしました。", error);
+}} catch (err) {
         console.error(err);
         alert("カードDBの読み込みに失敗しました。");
       }
