@@ -1,0 +1,19 @@
+[
+  {
+    "id": "test-001",
+    "name": "テスト・ドラゴン",
+    "civilization": ["火"],
+    "type": "クリーチャー",
+    "race": ["ドラゴン"],
+    "cost": 5,
+    "power": 6000,
+    "text": "テスト用のカードです。",
+    "image": "",
+    "ai": {
+      "breaker": 1,
+      "speedAttacker": false,
+      "shieldTrigger": false,
+      "effects": []
+    }
+  }
+]
