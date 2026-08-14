@@ -27,6 +27,8 @@
 
     main {
       padding: 20px;
+      max-width: 700px;
+      margin: auto;
     }
 
     .card {
@@ -35,6 +37,16 @@
       padding: 20px;
       margin-bottom: 15px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
     }
 
     button {
@@ -51,6 +63,19 @@
     button:active {
       opacity: 0.7;
     }
+
+    .deck-item {
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    .empty {
+      color: #777;
+      font-size: 14px;
+    }
   </style>
 </head>
 
@@ -63,24 +88,80 @@
   <main>
 
     <div class="card">
-      <h2>デッキ管理</h2>
-      <p>あなたのデュエマデッキを管理できます。</p>
-      <button>デッキを作成する</button>
+      <h2>デッキ作成</h2>
+      <p>デッキ名を入力してください。</p>
+
+      <input
+        id="deckName"
+        type="text"
+        placeholder="例：火自然ボルシャック"
+      >
+
+      <button onclick="createDeck()">デッキを作成する</button>
+    </div>
+
+    <div class="card">
+      <h2>📚 マイデッキ</h2>
+      <div id="deckList"></div>
     </div>
 
     <div class="card">
       <h2>🤖 AI対戦</h2>
       <p>今後、AIとの対戦機能を追加予定です。</p>
-      <button>AI対戦（準備中）</button>
+      <button disabled>AI対戦（準備中）</button>
     </div>
 
     <div class="card">
       <h2>📊 対戦記録</h2>
       <p>今後、対戦結果や勝率を記録できるようにします。</p>
-      <button>対戦記録（準備中）</button>
+      <button disabled>対戦記録（準備中）</button>
     </div>
 
   </main>
+
+  <script>
+    let decks = JSON.parse(localStorage.getItem("duelMastersDecks")) || [];
+
+    function createDeck() {
+      const input = document.getElementById("deckName");
+      const name = input.value.trim();
+
+      if (name === "") {
+        alert("デッキ名を入力してください。");
+        return;
+      }
+
+      decks.push({
+        name: name,
+        cards: []
+      });
+
+      localStorage.setItem("duelMastersDecks", JSON.stringify(decks));
+
+      input.value = "";
+      renderDecks();
+    }
+
+    function renderDecks() {
+      const deckList = document.getElementById("deckList");
+      deckList.innerHTML = "";
+
+      if (decks.length === 0) {
+        deckList.innerHTML =
+          '<p class="empty">まだデッキがありません。</p>';
+        return;
+      }
+
+      decks.forEach(function(deck) {
+        const div = document.createElement("div");
+        div.className = "deck-item";
+        div.textContent = "🎴 " + deck.name;
+        deckList.appendChild(div);
+      });
+    }
+
+    renderDecks();
+  </script>
 
 </body>
 </html>
