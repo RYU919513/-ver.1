@@ -238,5 +238,70 @@
     };
   }
 
+  async function validateCardsJson() {
+    try {
+      const response = await fetch("cards.json", { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error(`cards.json HTTP ${response.status}`);
+      }
+
+      const cards = await response.json();
+      const result = validateCardDatabase(cards);
+
+      window.cardDatabaseValidation = result;
+
+      if (result.ok && result.warningCount === 0) {
+        console.info("[カードDB検査] OK", result);
+      } else if (result.ok) {
+        console.warn("[カードDB検査] 警告あり", result);
+      } else {
+        console.error("[カードDB検査] エラーあり", result);
+      }
+
+      window.dispatchEvent(
+        new CustomEvent("dm-card-database-validated", {
+          detail: result
+        })
+      );
+
+      return result;
+    } catch (error) {
+      const result = {
+        ok: false,
+        cardCount: 0,
+        errorCount: 1,
+        warningCount: 0,
+        issues: [
+          {
+            level: "error",
+            code: "cards_json_load_failed",
+            message: `cards.json の検査読み込みに失敗しました: ${error.message}`,
+            cardIndex: null,
+            cardId: null
+          }
+        ]
+      };
+
+      window.cardDatabaseValidation = result;
+      console.error("[カードDB検査] 読み込み失敗", error);
+
+      window.dispatchEvent(
+        new CustomEvent("dm-card-database-validated", {
+          detail: result
+        })
+      );
+
+      return result;
+    }
+  }
+
   window.validateCardDatabase = validateCardDatabase;
+  window.validateCardsJson = validateCardsJson;
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", validateCardsJson, { once: true });
+  } else {
+    validateCardsJson();
+  }
 })();
