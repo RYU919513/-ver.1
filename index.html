@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#171717" />
   <title>デュエマ デッキ管理</title>
+
   <style>
     :root {
       --bg:#f3f4f6;
@@ -19,115 +20,155 @@
       --radius:14px;
     }
 
-    *{box-sizing:border-box}
+    * {
+      box-sizing:border-box;
+    }
 
-    body{
+    body {
       margin:0;
       font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
       background:var(--bg);
-      color:var(--text)
+      color:var(--text);
     }
 
-    header{
+    header {
       position:sticky;
       top:0;
       z-index:20;
       background:var(--dark);
       color:#fff;
       padding:14px 16px;
-      box-shadow:0 2px 12px rgba(0,0,0,.16)
+      box-shadow:0 2px 12px rgba(0,0,0,.16);
     }
 
-    .header-inner{
+    .header-inner {
       max-width:1100px;
       margin:0 auto;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px
+      gap:12px;
     }
 
-    h1{font-size:19px;margin:0}
+    h1 {
+      font-size:19px;
+      margin:0;
+    }
 
-    .status-pill{
+    .status-pill {
       font-size:12px;
       border:1px solid rgba(255,255,255,.25);
       border-radius:999px;
       padding:5px 9px;
-      white-space:nowrap
+      white-space:nowrap;
     }
 
-    main{
+    main {
       max-width:1100px;
       margin:0 auto;
       padding:14px;
-      padding-bottom:80px
+      padding-bottom:80px;
     }
 
-    .screen{display:none}
-    .screen.active{display:block}
+    .screen {
+      display:none;
+    }
 
-    .panel{
+    .screen.active {
+      display:block;
+    }
+
+    .panel {
       background:var(--panel);
       border-radius:var(--radius);
       padding:16px;
       margin-bottom:14px;
-      box-shadow:0 2px 10px rgba(0,0,0,.06)
+      box-shadow:0 2px 10px rgba(0,0,0,.06);
     }
 
-    .panel h2,.panel h3{margin-top:0}
+    .panel h2,
+    .panel h3 {
+      margin-top:0;
+    }
 
-    .row{
+    .row {
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      align-items:center
+      align-items:center;
     }
 
-    .grow{flex:1 1 220px}
+    .grow {
+      flex:1 1 220px;
+    }
 
-    input,select,textarea{
+    input,
+    select,
+    textarea {
       width:100%;
       padding:12px;
       border:1px solid #cfd4dc;
       border-radius:10px;
       font-size:16px;
       background:#fff;
-      color:var(--text)
+      color:var(--text);
     }
 
-    textarea{
+    textarea {
       min-height:110px;
-      resize:vertical
+      resize:vertical;
     }
 
-    label{
+    label {
       display:block;
       font-size:13px;
       color:#4b5563;
-      margin:10px 0 5px
+      margin:10px 0 5px;
     }
 
-    button{
+    button {
       border:0;
       border-radius:10px;
       padding:11px 14px;
       font-size:15px;
       background:var(--dark);
       color:#fff;
-      cursor:pointer
+      cursor:pointer;
     }
 
-    button:active{opacity:.72}
-    button.secondary{background:#6b7280}
-    button.light{background:#e5e7eb;color:#111}
-    button.danger{background:var(--danger)}
-    button.small{padding:8px 10px;font-size:13px}
-    button:disabled{opacity:.45;cursor:not-allowed}
+    button:active {
+      opacity:.72;
+    }
 
-    .deck-list{display:grid;gap:10px}
+    button.secondary {
+      background:#6b7280;
+    }
 
-    .deck-item{
+    button.light {
+      background:#e5e7eb;
+      color:#111;
+    }
+
+    button.danger {
+      background:var(--danger);
+    }
+
+    button.small {
+      padding:8px 10px;
+      font-size:13px;
+    }
+
+    button:disabled {
+      opacity:.45;
+      cursor:not-allowed;
+    }
+
+    .deck-list {
+      display:grid;
+      gap:10px;
+    }
+
+    .deck-item {
       border:1px solid var(--line);
       border-radius:12px;
       padding:14px;
@@ -135,77 +176,84 @@
       display:flex;
       justify-content:space-between;
       gap:10px;
-      align-items:center
+      align-items:center;
     }
 
-    .deck-item strong{display:block}
+    .deck-item strong {
+      display:block;
+    }
 
-    .muted{
+    .muted {
       color:var(--sub);
-      font-size:13px
+      font-size:13px;
     }
 
-    .empty{
+    .empty {
       color:var(--sub);
       text-align:center;
-      padding:20px 8px
+      padding:20px 8px;
     }
 
-    .top-actions{
+    .top-actions {
       display:flex;
       gap:8px;
       flex-wrap:wrap;
-      margin-bottom:12px
+      margin-bottom:12px;
     }
 
-    .count{
+    .count {
       font-size:28px;
       font-weight:800;
-      line-height:1
+      line-height:1;
     }
 
-    .count.ok{color:var(--ok)}
-    .count.warn{color:var(--warn)}
+    .count.ok {
+      color:var(--ok);
+    }
 
-    .search-tools{
+    .count.warn {
+      color:var(--warn);
+    }
+
+    .search-tools {
       display:grid;
       grid-template-columns:1fr;
-      gap:8px
+      gap:8px;
     }
 
-    @media (min-width:720px){
-      .search-tools{
-        grid-template-columns:2fr 1fr 1fr auto
+    @media (min-width:720px) {
+      .search-tools {
+        grid-template-columns:2fr 1fr 1fr auto;
       }
     }
 
-    .card-grid{
+    .card-grid {
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px
+      gap:10px;
     }
 
-    @media (min-width:640px){
-      .card-grid{
-        grid-template-columns:repeat(3,minmax(0,1fr))
+    @media (min-width:640px) {
+      .card-grid {
+        grid-template-columns:repeat(3,minmax(0,1fr));
       }
     }
 
-    @media (min-width:900px){
-      .card-grid{
-        grid-template-columns:repeat(4,minmax(0,1fr))
+    @media (min-width:900px) {
+      .card-grid {
+        grid-template-columns:repeat(4,minmax(0,1fr));
       }
     }
 
-    .card-box{
+    .card-box {
       border:1px solid var(--line);
       border-radius:12px;
       overflow:hidden;
       background:#fff;
-      min-width:0
+      min-width:0;
     }
 
-    .card-image{
+    .card-image {
       width:100%;
       aspect-ratio:5/7;
       background:linear-gradient(135deg,#e5e7eb,#f9fafb);
@@ -215,17 +263,17 @@
       color:#6b7280;
       font-size:12px;
       overflow:hidden;
-      position:relative
+      position:relative;
     }
 
-    .card-image img{
+    .card-image img {
       width:100%;
       height:100%;
       object-fit:cover;
-      display:block
+      display:block;
     }
 
-    .badge{
+    .badge {
       position:absolute;
       right:6px;
       bottom:6px;
@@ -234,27 +282,29 @@
       border-radius:999px;
       padding:4px 7px;
       font-size:12px;
-      font-weight:700
+      font-weight:700;
     }
 
-    .card-info{padding:10px}
+    .card-info {
+      padding:10px;
+    }
 
-    .card-name{
+    .card-name {
       font-weight:750;
       line-height:1.35;
       font-size:14px;
       overflow-wrap:anywhere;
-      min-height:38px
+      min-height:38px;
     }
 
-    .meta{
+    .meta {
       margin-top:6px;
       color:#4b5563;
       font-size:12px;
-      line-height:1.45
+      line-height:1.45;
     }
 
-    .effect-preview{
+    .effect-preview {
       margin-top:7px;
       font-size:12px;
       line-height:1.45;
@@ -263,53 +313,53 @@
       -webkit-line-clamp:3;
       -webkit-box-orient:vertical;
       overflow:hidden;
-      white-space:pre-wrap
+      white-space:pre-wrap;
     }
 
-    .card-actions{
+    .card-actions {
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:6px;
-      margin-top:9px
+      margin-top:9px;
     }
 
-    .card-actions.one{
-      grid-template-columns:1fr
+    .card-actions.one {
+      grid-template-columns:1fr;
     }
 
-    .qty-controls{
+    .qty-controls {
       display:grid;
       grid-template-columns:1fr auto 1fr;
       gap:6px;
       align-items:center;
-      margin-top:8px
+      margin-top:8px;
     }
 
-    .qty-label{
+    .qty-label {
       text-align:center;
-      font-weight:800
+      font-weight:800;
     }
 
-    dialog{
+    dialog {
       border:0;
       border-radius:16px;
       width:min(92vw,620px);
       max-height:88vh;
       padding:0;
-      box-shadow:0 18px 60px rgba(0,0,0,.28)
+      box-shadow:0 18px 60px rgba(0,0,0,.28);
     }
 
-    dialog::backdrop{
-      background:rgba(0,0,0,.55)
+    dialog::backdrop {
+      background:rgba(0,0,0,.55);
     }
 
-    .modal{
+    .modal {
       padding:16px;
       max-height:88vh;
-      overflow:auto
+      overflow:auto;
     }
 
-    .detail-image{
+    .detail-image {
       width:min(100%,360px);
       aspect-ratio:5/7;
       margin:0 auto 14px;
@@ -319,100 +369,105 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      color:#6b7280
+      color:#6b7280;
     }
 
-    .detail-image img{
+    .detail-image img {
       width:100%;
       height:100%;
-      object-fit:cover
+      object-fit:cover;
     }
 
-    .detail-text{
+    .detail-text {
       white-space:pre-wrap;
       line-height:1.65;
-      font-size:14px
+      font-size:14px;
     }
 
-    .db-list{
+    .db-list {
       display:grid;
-      gap:8px
+      gap:8px;
     }
 
-    .db-row{
+    .db-row {
       border:1px solid var(--line);
       border-radius:10px;
       padding:10px;
       display:flex;
       gap:10px;
       align-items:center;
-      justify-content:space-between
+      justify-content:space-between;
     }
 
-    .db-thumb{
+    .db-thumb {
       width:48px;
       height:67px;
       object-fit:cover;
       border-radius:6px;
       background:#e5e7eb;
-      flex:0 0 auto
+      flex:0 0 auto;
     }
 
-    .db-main{
+    .db-main {
       min-width:0;
-      flex:1
+      flex:1;
     }
 
-    .db-main strong{
+    .db-main strong {
       display:block;
-      overflow-wrap:anywhere
+      overflow-wrap:anywhere;
     }
 
-    .notice{
+    .notice {
       border-left:4px solid #111;
       background:#f9fafb;
       padding:10px 12px;
       border-radius:8px;
       font-size:13px;
-      line-height:1.6
+      line-height:1.6;
     }
 
-    .danger-note{
-      border-left-color:var(--danger)
+    .danger-note {
+      border-left-color:var(--danger);
     }
 
-    .file-button{
+    .catalog-status {
+      margin-top:8px;
+      font-size:13px;
+    }
+
+    .file-button {
       display:inline-block;
       background:#e5e7eb;
       color:#111;
       padding:10px 12px;
       border-radius:10px;
       cursor:pointer;
-      font-size:14px
+      font-size:14px;
     }
 
-    .file-button input{
-      display:none
+    .file-button input {
+      display:none;
     }
 
-    .login-box{
+    .login-box {
       max-width:520px;
-      margin:30px auto
+      margin:30px auto;
     }
 
-    .login-error{
+    .login-error {
       display:none;
       margin-top:12px;
       border-left-color:var(--danger);
       background:#fef2f2;
-      color:#991b1b
+      color:#991b1b;
     }
 
-    footer{
+    footer {
       text-align:center;
       color:#9ca3af;
       font-size:11px;
-      margin-top:20px
+      margin-top:20px;
     }
   </style>
 </head>
@@ -424,7 +479,9 @@
     <h1>🎴 デュエマ デッキ管理</h1>
 
     <div class="row">
-      <div id="authStatus" class="status-pill">確認中…</div>
+      <div id="authStatus" class="status-pill">
+        確認中…
+      </div>
 
       <button
         id="logoutButton"
@@ -435,9 +492,7 @@
       </button>
     </div>
   </div>
-</header>
-
-<main>
+</header><main>
 
 <section id="screen-login" class="screen active">
 
@@ -691,10 +746,7 @@
 
   </div>
 
-</section>
-
-
-<section id="screen-database" class="screen">
+</section><section id="screen-database" class="screen">
 
   <div class="top-actions">
 
@@ -704,243 +756,40 @@
       ← 戻る
     </button>
 
-    <button
-      class="light"
-      onclick="exportDatabase()">
-      DBを書き出す
-    </button>
-
-    <label class="file-button">
-
-      DBを読み込む
-
-      <input
-        id="importDbFile"
-        type="file"
-        accept=".json,application/json"
-        onchange="importDatabaseFile(event)"
-      />
-
-    </label>
-
   </div>
 
 
   <div class="panel">
 
-    <h2>🗂️ カードDB管理</h2>
+    <h2>🗃️ カードDB管理</h2>
 
     <div class="notice">
-      カード情報を登録すると、デッキ画面の検索候補に出ます。
-      画像は端末内に保存します。
+      カード名を検索すると、cards.jsonからカード情報を取得できます。
     </div>
 
-    <div class="panel" style="margin-top:12px;background:#f9fafb;">
-      <h3>🔎 カード名から自動入力</h3>
-      <div class="muted" style="margin-bottom:8px;">
-        cards.json に登録されているカード名を検索して、カード情報を自動入力できます。
-      </div>
-      <div class="row">
-        <div class="grow">
-          <input
-            id="cardLookupName"
-            type="search"
-            placeholder="例：テスト・ドラゴン"
-            oninput="searchCardCatalog()"
-          />
-        </div>
-        <button class="secondary" onclick="searchCardCatalog()">検索</button>
-      </div>
-      <div id="cardLookupResults" class="db-list" style="margin-top:10px;"></div>
-    </div>
 
-    <input
-      id="dbEditId"
-      type="hidden"
-    />
-
-    <label>カード名 *</label>
-
-    <input
-      id="dbName"
-      placeholder="カード名"
-    />
-
-
-    <div class="row">
+    <div class="row" style="margin-top:12px;">
 
       <div class="grow">
 
-        <label>文明</label>
-
-        <select id="dbCiv">
-
-          <option value="">未設定</option>
-          <option>光</option>
-          <option>水</option>
-          <option>闇</option>
-          <option>火</option>
-          <option>自然</option>
-          <option>無色</option>
-          <option>多色</option>
-
-        </select>
-
-      </div>
-
-
-      <div class="grow">
-
-        <label>コスト</label>
-
         <input
-          id="dbCost"
-          type="number"
-          min="0"
-          placeholder="5"
+          id="cardCatalogSearch"
+          type="search"
+          placeholder="カード名を検索"
         />
 
       </div>
-
-    </div>
-
-
-    <div class="row">
-
-      <div class="grow">
-
-        <label>種類</label>
-
-        <input
-          id="dbType"
-          placeholder="クリーチャー"
-        />
-
-      </div>
-
-
-      <div class="grow">
-
-        <label>種族</label>
-
-        <input
-          id="dbRace"
-          placeholder="例：アーマード・ドラゴン"
-        />
-
-      </div>
-
-    </div>
-
-
-    <label>パワー</label>
-
-    <input
-      id="dbPower"
-      placeholder="例：6000"
-    />
-
-
-    <label>能力テキスト</label>
-
-    <textarea
-      id="dbText"
-      placeholder="カードの能力テキスト">
-    </textarea>
-
-
-    <label>カード番号・収録番号</label>
-
-    <input
-      id="dbNumber"
-      placeholder="任意"
-    />
-
-
-    <label>AI用メモ（将来用）</label>
-
-    <textarea
-      id="dbAiNotes"
-      placeholder="例：登場時ドロー、除去、S・トリガー等。">
-    </textarea>
-
-
-    <label>画像</label>
-
-    <div class="row">
-
-      <label class="file-button">
-
-        端末から画像を選択
-
-        <input
-          id="dbImageFile"
-          type="file"
-          accept="image/*"
-          onchange="previewSelectedImage(event)"
-        />
-
-      </label>
-
-
-      <button
-        class="light small"
-        onclick="clearSelectedImage()">
-        画像を外す
-      </button>
-
-    </div>
-
-
-    <div
-      id="dbImagePreview"
-      class="detail-image"
-      style="margin-top:10px;max-width:220px;">
-      画像なし
-    </div>
-
-
-    <div class="row">
-
-      <button onclick="saveDatabaseCard()">
-        カードをDBへ保存
-      </button>
 
       <button
         class="secondary"
-        onclick="clearDbForm()">
-        入力をクリア
+        onclick="searchCardCatalog()">
+        検索
       </button>
 
     </div>
 
-  </div>
-
-
-  <div class="panel">
-
-    <div class="row">
-
-      <div class="grow">
-
-        <input
-          id="dbSearch"
-          type="search"
-          placeholder="登録済みDBを検索"
-          oninput="renderDatabaseList()"
-        />
-
-      </div>
-
-      <div class="muted">
-        <span id="dbCount">0</span>件
-      </div>
-
-    </div>
-
-
     <div
-      id="databaseList"
+      id="cardLookupResults"
       class="db-list"
       style="margin-top:10px;">
     </div>
@@ -948,14 +797,209 @@
   </div>
 
 
-  <div class="panel">
+  <input
+    id="dbEditId"
+    type="hidden"
+  />
 
-    <div class="notice danger-note">
-      このHTMLには市販カードの画像・能力テキスト自体は同梱していません。
-      自分で登録したデータはこの端末のブラウザ内に保存されます。
+
+  <label>カード名 *</label>
+
+  <input
+    id="dbName"
+    placeholder="カード名"
+  />
+
+
+  <div class="row">
+
+    <div class="grow">
+
+      <label>文明</label>
+
+      <select id="dbCiv">
+
+        <option value="">未設定</option>
+        <option>光</option>
+        <option>水</option>
+        <option>闇</option>
+        <option>火</option>
+        <option>自然</option>
+        <option>無色</option>
+        <option>多色</option>
+
+      </select>
+
+    </div>
+
+
+    <div class="grow">
+
+      <label>コスト</label>
+
+      <input
+        id="dbCost"
+        type="number"
+        min="0"
+        placeholder="5"
+      />
+
     </div>
 
   </div>
+
+
+  <div class="row">
+
+    <div class="grow">
+
+      <label>種類</label>
+
+      <input
+        id="dbType"
+        placeholder="クリーチャー"
+      />
+
+    </div>
+
+
+    <div class="grow">
+
+      <label>種族</label>
+
+      <input
+        id="dbRace"
+        placeholder="例：アーマード・ドラゴン"
+      />
+
+    </div>
+
+  </div>
+
+
+  <label>パワー</label>
+
+  <input
+    id="dbPower"
+    placeholder="例：6000"
+  />
+
+
+  <label>能力テキスト</label>
+
+  <textarea
+    id="dbText"
+    placeholder="カードの能力テキスト">
+  </textarea>
+
+
+  <label>カード番号・収録番号</label>
+
+  <input
+    id="dbNumber"
+    placeholder="任意"
+  />
+
+
+  <label>AI用メモ（将来用）</label>
+
+  <textarea
+    id="dbAiNotes"
+    placeholder="例：登場時ドロー、除去、S・トリガー等。">
+  </textarea>
+
+
+  <label>画像</label>
+
+  <div class="row">
+
+    <label class="file-button">
+
+      端末から画像を選択
+
+      <input
+        id="dbImageFile"
+        type="file"
+        accept="image/*"
+        onchange="previewSelectedImage(event)"
+      />
+
+    </label>
+
+
+    <button
+      class="light small"
+      onclick="clearSelectedImage()">
+      画像を外す
+    </button>
+
+  </div>
+
+
+  <div
+    id="dbImagePreview"
+    class="detail-image"
+    style="margin-top:10px;max-width:220px;">
+    画像なし
+  </div>
+
+
+  <div class="row">
+
+    <button onclick="saveDatabaseCard()">
+      カードをDBへ保存
+    </button>
+
+    <button
+      class="secondary"
+      onclick="clearDbForm()">
+      入力をクリア
+    </button>
+
+  </div>
+
+</div>
+
+
+<div class="panel">
+
+  <div class="row">
+
+    <div class="grow">
+
+      <input
+        id="dbSearch"
+        type="search"
+        placeholder="登録済みDBを検索"
+        oninput="renderDatabaseList()"
+      />
+
+    </div>
+
+    <div class="muted">
+      <span id="dbCount">0</span>件
+    </div>
+
+  </div>
+
+
+  <div
+    id="databaseList"
+    class="db-list"
+    style="margin-top:10px;">
+  </div>
+
+</div>
+
+
+<div class="panel">
+
+  <div class="notice danger-note">
+    このHTMLには市販カードの画像・能力テキスト自体は同梱していません。
+    自分で登録したデータはこの端末のブラウザ内に保存されます。
+  </div>
+
+</div>
 
 </section>
 
@@ -1250,11 +1294,21 @@ function renderDecks(){
 
         </div>
 
-        <button
-          class="small"
-          onclick="openDeck(${index})">
-          開く
-        </button>
+        <div class="row">
+
+          <button
+            class="small"
+            onclick="openDeck(${index})">
+            開く
+          </button>
+
+          <button
+            class="small danger"
+            onclick="deleteDeck(${index})">
+            削除
+          </button>
+
+        </div>
 
       `;
 
@@ -1266,99 +1320,129 @@ function renderDecks(){
 }
 
 
+function getDeckTotal(deck){
+
+  return deck.cards.reduce(
+    (sum,item)=>
+      sum+(Number(item.qty)||0),
+    0
+  );
+
+}
+
+
 function openDeck(index){
+
+  if(!decks[index])
+    return;
 
   currentDeckIndex=index;
 
-  previousScreen="deck";
+  document.getElementById(
+    "deckTitle"
+  ).textContent=
+    decks[index].name;
 
   showScreen("deck");
 
 }
 
 
-function getDeckTotal(deck){
+function deleteDeck(index){
 
-  return(deck.cards||[])
-    .reduce(
-      (sum,item)=>
-        sum+Number(item.qty||0),
-      0
-    );
+  const deck=decks[index];
+
+  if(!deck)
+    return;
+
+  if(
+    !confirm(
+      `「${deck.name}」を削除しますか？`
+    )
+  ){
+    return;
+  }
+
+  decks.splice(index,1);
+
+  saveDecks();
+
+  renderDecks();
+
+}
+
+
+function deleteCurrentDeck(){
+
+  if(currentDeckIndex===null)
+    return;
+
+  deleteDeck(currentDeckIndex);
+
+  currentDeckIndex=null;
+
+  showScreen("home");
 
 }
 
 
 function renderDeck(){
 
-  const deck=
-    decks[currentDeckIndex];
-
-  if(!deck)
-    return;
-
-  document
-    .getElementById("deckTitle")
-    .textContent=
-      "🎴 "+deck.name;
-
-  const total=
-    getDeckTotal(deck);
-
-  const count=
-    document.getElementById(
-      "deckCount"
-    );
-
-  count.textContent=total;
-
-  count.className=
-    "count "+
-    (
-      total===40
-        ?"ok"
-        :total>40
-          ?"warn"
-          :""
-    );
-
-  const grid=
+  const box=
     document.getElementById(
       "deckCards"
     );
 
-  grid.innerHTML="";
+  if(
+    currentDeckIndex===null ||
+    !decks[currentDeckIndex]
+  ){
+
+    box.innerHTML=
+      '<div class="empty">デッキが選択されていません。</div>';
+
+    return;
+  }
+
+  const deck=
+    decks[currentDeckIndex];
+
+  document.getElementById(
+    "deckTitle"
+  ).textContent=
+    deck.name;
+
+  document.getElementById(
+    "deckCount"
+  ).textContent=
+    getDeckTotal(deck);
+
+  box.innerHTML="";
 
   if(!deck.cards.length){
 
-    grid.innerHTML=
-      '<div class="empty">まだカードが入っていません。上の検索から追加してください。</div>';
+    box.innerHTML=
+      '<div class="empty">まだカードがありません。上の検索結果から追加してください。</div>';
 
     return;
   }
 
   deck.cards.forEach(
-    (item,index)=>{
+    item=>{
 
       const card=
-        findCardById(item.cardId)||
-        {
-          id:item.cardId,
-          name:item.name||"不明なカード",
-          civilization:"",
-          cost:"",
-          type:"",
-          race:"",
-          power:"",
-          text:"",
-          image:""
-        };
+        cardDatabase.find(
+          c=>c.id===item.cardId
+        );
 
-      grid.appendChild(
-        createDeckCardElement(
+      if(!card)
+        return;
+
+      box.appendChild(
+        createCardElement(
           card,
           item.qty,
-          index
+          true
         )
       );
 
@@ -1368,30 +1452,161 @@ function renderDeck(){
 }
 
 
-function createDeckCardElement(
-  card,
-  qty,
-  index
-){
+function renderSearch(){
+
+  const text=
+    document.getElementById(
+      "searchText"
+    ).value
+      .trim()
+      .toLowerCase();
+
+  const civ=
+    document.getElementById(
+      "filterCiv"
+    ).value;
+
+  const type=
+    document.getElementById(
+      "filterType"
+    ).value;
+
+  const results=
+    cardDatabase.filter(
+      card=>{
+
+        const haystack=
+          [
+            card.name,
+            card.civilization,
+            card.type,
+            card.race,
+            card.text
+          ]
+          .join(" ")
+          .toLowerCase();
+
+        const textOk=
+          !text ||
+          haystack.includes(text);
+
+        const civOk=
+          !civ ||
+          card.civilization.includes(civ);
+
+        const typeOk=
+          !type ||
+          card.type.includes(type);
+
+        return textOk &&
+          civOk &&
+          typeOk;
+
+      }
+    );
+
+  const count=
+    document.getElementById(
+      "searchCount"
+    );
+
+  count.textContent=
+    `（${results.length}件）`;
 
   const box=
+    document.getElementById(
+      "searchResults"
+    );
+
+  box.innerHTML="";
+
+  if(!results.length){
+
+    box.innerHTML=
+      '<div class="empty">一致するカードがありません。</div>';
+
+    return;
+  }
+
+  results.forEach(
+    card=>{
+
+      box.appendChild(
+        createCardElement(
+          card,
+          getDeckQty(card.id),
+          false
+        )
+      );
+
+    }
+  );
+
+}
+
+
+function getDeckQty(cardId){
+
+  if(
+    currentDeckIndex===null ||
+    !decks[currentDeckIndex]
+  )
+    return 0;
+
+  const item=
+    decks[currentDeckIndex]
+      .cards.find(
+        x=>x.cardId===cardId
+      );
+
+  return item
+    ?Number(item.qty)||0
+    :0;
+
+}
+
+
+function createCardElement(
+  card,
+  qty=0,
+  inDeck=false
+){
+
+  const el=
     document.createElement("div");
 
-  box.className="card-box";
+  el.className="card-box";
 
-  box.innerHTML=`
+  const image=
+    card.image
+      ? `
+        <img
+          src="${escapeHtml(card.image)}"
+          alt="${escapeHtml(card.name)}"
+        />
+      `
+      : `
+        <div>
+          画像なし
+        </div>
+      `;
+
+  el.innerHTML=`
 
     <div
       class="card-image"
       onclick="showCardDetail('${escapeHtml(card.id)}')">
 
-      ${imageHtml(card)}
+      ${image}
 
-      <span class="badge">
-        ×${qty}
-      </span>
+      ${
+        qty>0
+          ? `<div class="badge">${qty}枚</div>`
+          : ""
+      }
 
     </div>
+
 
     <div class="card-info">
 
@@ -1400,133 +1615,81 @@ function createDeckCardElement(
       </div>
 
       <div class="meta">
+        ${escapeHtml(card.civilization||"")}
+        ／
+        ${escapeHtml(card.type||"")}
+        ／
+        コスト${escapeHtml(card.cost)}
+      </div>
 
-        ${escapeHtml(card.civilization||"未設定")}
-        /
-        コスト ${escapeHtml(card.cost||"-")}
+      <div class="meta">
+        ${escapeHtml(card.race||"")}
+        ／
+        ${escapeHtml(card.power||"")}
+      </div>
 
-        <br>
-
-        ${escapeHtml(card.type||"未設定")}
-
+      <div class="effect-preview">
+        ${escapeHtml(card.text||"")}
       </div>
 
 
-      <div class="qty-controls">
+      ${
+        inDeck
+          ? `
+            <div class="qty-controls">
 
-        <button
-          class="small secondary"
-          onclick="changeDeckQty(${index},-1)">
-          −
-        </button>
+              <button
+                class="light small"
+                onclick="changeDeckCard('${escapeHtml(card.id)}',-1)">
+                −
+              </button>
 
-        <div class="qty-label">
-          ×${qty}
-        </div>
+              <div class="qty-label">
+                ${qty}
+              </div>
 
-        <button
-          class="small"
-          onclick="changeDeckQty(${index},1)">
-          ＋
-        </button>
+              <button
+                class="small"
+                onclick="changeDeckCard('${escapeHtml(card.id)}',1)">
+                ＋
+              </button>
 
-      </div>
+            </div>
+          `
+          : `
+            <div class="card-actions one">
 
+              <button
+                class="small"
+                onclick="addCardToDeck('${escapeHtml(card.id)}')">
+                デッキに追加
+              </button>
 
-      <div class="card-actions one">
-
-        <button
-          class="small light"
-          onclick="showCardDetail('${escapeHtml(card.id)}')">
-          詳細
-        </button>
-
-      </div>
+            </div>
+          `
+      }
 
     </div>
 
   `;
 
-  return box;
-
-}
-
-
-function changeDeckQty(
-  index,
-  delta
-){
-
-  const deck=
-    decks[currentDeckIndex];
-
-  const item=
-    deck.cards[index];
-
-  if(!item)
-    return;
-
-  const total=
-    getDeckTotal(deck);
-
-  if(
-    delta>0 &&
-    item.qty>=4
-  ){
-
-    alert(
-      "現在は同名カード4枚までの設定です。"
-    );
-
-    return;
-  }
-
-  if(
-    delta>0 &&
-    total>=40
-  ){
-
-    alert(
-      "デッキは40枚までです。"
-    );
-
-    return;
-  }
-
-  item.qty+=delta;
-
-  if(item.qty<=0){
-
-    deck.cards.splice(
-      index,
-      1
-    );
-
-  }
-
-  saveDecks();
-
-  renderDeck();
-
-  renderSearch();
+  return el;
 
 }
 
 
 function addCardToDeck(cardId){
 
+  if(currentDeckIndex===null)
+    return;
+
   const deck=
     decks[currentDeckIndex];
 
-  const card=
-    findCardById(cardId);
+  const total=
+    getDeckTotal(deck);
 
-  if(!deck||!card)
-    return;
-
-  if(
-    getDeckTotal(deck)>=40
-  ){
+  if(total>=40){
 
     alert(
       "デッキは40枚までです。"
@@ -1537,32 +1700,28 @@ function addCardToDeck(cardId){
 
   const existing=
     deck.cards.find(
-      x=>x.cardId===cardId
+      item=>item.cardId===cardId
     );
 
   if(existing){
 
-    if(existing.qty>=4){
+    if(Number(existing.qty)>=4){
 
       alert(
-        "現在は同名カード4枚までの設定です。"
+        "同じカードは通常4枚までです。"
       );
 
       return;
     }
 
-    existing.qty++;
+    existing.qty=
+      Number(existing.qty)+1;
 
-  }
-
-  else{
+  }else{
 
     deck.cards.push({
-
       cardId:cardId,
-      name:card.name,
       qty:1
-
     });
 
   }
@@ -1576,186 +1735,68 @@ function addCardToDeck(cardId){
 }
 
 
-function renderSearch(){
+function changeDeckCard(
+  cardId,
+  delta
+){
 
-  if(
-    currentDeckIndex===null
-  )
+  if(currentDeckIndex===null)
     return;
 
-  const q=
-    document
-      .getElementById("searchText")
-      .value
-      .trim()
-      .toLowerCase();
+  const deck=
+    decks[currentDeckIndex];
 
-  const civ=
-    document
-      .getElementById("filterCiv")
-      .value;
-
-  const type=
-    document
-      .getElementById("filterType")
-      .value;
-
-  const results=
-    allCards().filter(
-      card=>{
-
-        const hay=
-          [
-            card.name,
-            card.race,
-            card.text,
-            card.number
-          ]
-          .join(" ")
-          .toLowerCase();
-
-        return(
-          (!q||hay.includes(q))&&
-          (!civ||card.civilization.includes(civ))&&
-          (!type||(card.type||"").includes(type))
-        );
-
-      }
+  const item=
+    deck.cards.find(
+      x=>x.cardId===cardId
     );
 
-
-  document
-    .getElementById("searchCount")
-    .textContent=
-      `(${results.length}件)`;
-
-
-  const grid=
-    document.getElementById(
-      "searchResults"
-    );
-
-  grid.innerHTML="";
-
-
-  if(!results.length){
-
-    grid.innerHTML=
-      '<div class="empty">一致するカードがありません。</div>';
-
+  if(!item)
     return;
-  }
 
+  const next=
+    Number(item.qty)+delta;
 
-  results
-    .slice(0,100)
-    .forEach(
-      card=>{
+  if(next<=0){
 
-        const existing=
-          decks[currentDeckIndex]
-            .cards
-            .find(
-              x=>x.cardId===card.id
-            );
+    deck.cards=
+      deck.cards.filter(
+        x=>x.cardId!==cardId
+      );
 
-        const qty=
-          existing
-            ?existing.qty
-            :0;
+  }else{
 
-        const box=
-          document.createElement("div");
+    if(next>4){
 
-        box.className="card-box";
+      alert(
+        "同じカードは通常4枚までです。"
+      );
 
-        box.innerHTML=`
+      return;
+    }
 
-          <div
-            class="card-image"
-            onclick="showCardDetail('${escapeHtml(card.id)}')">
+    if(
+      getDeckTotal(deck)-
+      Number(item.qty)+
+      next>40
+    ){
 
-            ${imageHtml(card)}
+      alert(
+        "デッキは40枚までです。"
+      );
 
-            ${
-              qty
-                ?`<span class="badge">
-                    デッキ ×${qty}
-                  </span>`
-                :""
-            }
+      return;
+    }
 
-          </div>
-
-
-          <div class="card-info">
-
-            <div class="card-name">
-              ${escapeHtml(card.name)}
-            </div>
-
-
-            <div class="meta">
-
-              ${escapeHtml(card.civilization||"未設定")}
-              /
-              コスト ${escapeHtml(card.cost||"-")}
-
-              <br>
-
-              ${escapeHtml(card.type||"未設定")}
-
-            </div>
-
-
-            <div class="effect-preview">
-              ${escapeHtml(card.text||"")}
-            </div>
-
-
-            <div class="card-actions">
-
-              <button
-                class="small light"
-                onclick="showCardDetail('${escapeHtml(card.id)}')">
-                詳細
-              </button>
-
-              <button
-                class="small"
-                onclick="addCardToDeck('${escapeHtml(card.id)}')">
-                ＋1
-              </button>
-
-            </div>
-
-          </div>
-
-        `;
-
-        grid.appendChild(box);
-
-      }
-    );
-
-}
-
-
-function imageHtml(card){
-
-  if(card.image){
-
-    return`
-      <img
-        src="${escapeHtml(card.image)}"
-        alt="${escapeHtml(card.name)}"
-        onerror="this.style.display='none';this.parentElement.insertAdjacentText('beforeend','画像を表示できません');"
-      >
-    `;
+    item.qty=next;
 
   }
 
-  return"画像なし";
+  saveDecks();
+
+  renderDeck();
+
+  renderSearch();
 
 }
 
@@ -1763,118 +1804,75 @@ function imageHtml(card){
 function showCardDetail(cardId){
 
   const card=
-    findCardById(cardId);
+    cardDatabase.find(
+      c=>c.id===cardId
+    );
 
   if(!card)
     return;
 
-  document
-    .getElementById("detailContent")
-    .innerHTML=`
+  const image=
+    card.image
+      ? `
+        <img
+          src="${escapeHtml(card.image)}"
+          alt="${escapeHtml(card.name)}"
+        />
+      `
+      : "画像なし";
 
-      <div class="detail-image">
-        ${imageHtml(card)}
-      </div>
+  document.getElementById(
+    "detailContent"
+  ).innerHTML=`
 
-      <h2>
-        ${escapeHtml(card.name)}
-      </h2>
+    <div class="detail-image">
+      ${image}
+    </div>
 
-      <div class="meta">
+    <h2>
+      ${escapeHtml(card.name)}
+    </h2>
 
-        文明：
-        ${escapeHtml(card.civilization||"-")}
+    <div class="meta">
+      文明：
+      ${escapeHtml(card.civilization||"未設定")}
+    </div>
 
-        <br>
+    <div class="meta">
+      コスト：
+      ${escapeHtml(card.cost)}
+    </div>
 
-        コスト：
-        ${escapeHtml(card.cost||"-")}
+    <div class="meta">
+      種類：
+      ${escapeHtml(card.type||"未設定")}
+    </div>
 
-        <br>
+    <div class="meta">
+      種族：
+      ${escapeHtml(card.race||"未設定")}
+    </div>
 
-        種類：
-        ${escapeHtml(card.type||"-")}
+    <div class="meta">
+      パワー：
+      ${escapeHtml(card.power||"未設定")}
+    </div>
 
-        <br>
+    <hr />
 
-        種族：
-        ${escapeHtml(card.race||"-")}
+    <div class="detail-text">
+      ${escapeHtml(card.text||"能力テキストなし")}
+    </div>
 
-        <br>
-
-        パワー：
-        ${escapeHtml(card.power||"-")}
-
-        <br>
-
-        番号：
-        ${escapeHtml(card.number||"-")}
-
-      </div>
-
-
-      <h3>
-        能力テキスト
-      </h3>
-
-      <div class="detail-text">
-        ${escapeHtml(card.text||"未登録")}
-      </div>
-
-
-      <h3>
-        AI用メモ
-      </h3>
-
-      <div class="detail-text">
-        ${escapeHtml(card.aiNotes||"未登録")}
-      </div>
-
-    `;
-
+  `;
 
   document
-    .getElementById("detailDialog")
+    .getElementById(
+      "detailDialog"
+    )
     .showModal();
 
-}
-
-
-function allCards(){
-
-  const map=
-    new Map();
-
-  [
-    ...BUILTIN_TEST_CARDS,
-    ...cardDatabase
-  ]
-  .forEach(
-    c=>
-      map.set(
-        c.id,
-        normalizeCard(c)
-      )
-  );
-
-  return[
-    ...map.values()
-  ];
-
-}
-
-
-function findCardById(id){
-
-  return allCards()
-    .find(
-      c=>c.id===id
-    );
-
-}
-
-
-function openCardDb(){
+}function openCardDb(){
 
   return new Promise(
     (resolve,reject)=>{
@@ -2169,440 +2167,78 @@ function renderDbImagePreview(){
 
 
 function searchCardCatalog(){
-  const input = document.getElementById("cardLookupName");
-  const resultsBox = document.getElementById("cardLookupResults");
 
-  if(!input || !resultsBox) return;
+  const input =
+    document.getElementById(
+      "cardLookupName"
+    );
 
-  const q = input.value.trim().toLowerCase();
+  const resultsBox =
+    document.getElementById(
+      "cardLookupResults"
+    );
+
+  if(!input || !resultsBox)
+    return;
+
+  const q =
+    input.value
+      .trim()
+      .toLowerCase();
 
   if(!q){
+
     resultsBox.innerHTML =
       '<div class="empty">カード名を入力してください。</div>';
+
     return;
+
   }
 
-  const results = allCards()
-    .filter(card =>
-      String(card.name || "").toLowerCase().includes(q)
-    )
-    .slice(0, 20);
+  const results =
+    allCards()
+      .filter(
+        card =>
+          String(
+            card.name || ""
+          )
+          .toLowerCase()
+          .includes(q)
+      )
+      .slice(0,20);
 
-  resultsBox.innerHTML = "";
+  resultsBox.innerHTML="";
 
   if(!results.length){
+
     resultsBox.innerHTML =
       '<div class="empty">一致するカードがありません。</div>';
-    return;
-  }
-
-  results.forEach(card => {
-    const row = document.createElement("div");
-    row.className = "db-row";
-
-    row.innerHTML = `
-      ${
-        card.image
-          ? `<img class="db-thumb"
-                  src="${escapeHtml(card.image)}"
-                  alt="${escapeHtml(card.name)}">`
-          : `<div class="db-thumb"></div>`
-      }
-
-      <div class="db-main">
-        <strong>${escapeHtml(card.name)}</strong>
-        <div class="muted">
-          ${escapeHtml(card.civilization || "-")} /
-          コスト ${escapeHtml(card.cost || "-")} /
-          ${escapeHtml(card.type || "-")}
-        </div>
-      </div>
-
-      <button
-        class="small"
-        onclick="applyCatalogCard('${escapeHtml(card.id)}')">
-        このカードを入力
-      </button>
-    `;
-
-    resultsBox.appendChild(row);
-  });
-}
-
-
-function applyCatalogCard(cardId){
-  const card = findCardById(cardId);
-
-  if(!card){
-    alert("カード情報が見つかりません。");
-    return;
-  }
-
-  document.getElementById("dbEditId").value = "";
-  document.getElementById("dbName").value = card.name || "";
-  document.getElementById("dbCiv").value =
-    Array.isArray(card.civilization)
-      ? card.civilization[0] || ""
-      : card.civilization || "";
-  document.getElementById("dbCost").value = card.cost ?? "";
-  document.getElementById("dbType").value = card.type || "";
-  document.getElementById("dbRace").value =
-    Array.isArray(card.race)
-      ? card.race.join("・")
-      : card.race || "";
-  document.getElementById("dbPower").value = card.power ?? "";
-  document.getElementById("dbText").value = card.text || "";
-  document.getElementById("dbNumber").value = card.number || "";
-
-  document.getElementById("dbAiNotes").value =
-    card.aiNotes ||
-    (card.ai ? JSON.stringify(card.ai, null, 2) : "");
-
-  selectedImageData = card.image || "";
-  renderDbImagePreview();
-
-  const lookup = document.getElementById("cardLookupName");
-  const resultsBox = document.getElementById("cardLookupResults");
-
-  if(lookup){
-    lookup.value = card.name || "";
-  }
-
-  if(resultsBox){
-    resultsBox.innerHTML =
-      '<div class="notice">カード情報を入力しました。内容を確認して「カードをDBへ保存」を押してください。</div>';
-  }
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-}
-
-
-async function saveDatabaseCard(){
-
-  const name=
-    document
-      .getElementById("dbName")
-      .value
-      .trim();
-
-  if(!name){
-
-    alert(
-      "カード名を入力してください。"
-    );
 
     return;
-  }
-
-
-  const editingId=
-    document
-      .getElementById("dbEditId")
-      .value;
-
-  const old=
-    editingId
-      ?cardDatabase.find(
-        c=>c.id===editingId
-      )
-      :null;
-
-
-  const card={
-
-    id:
-      editingId||uid(),
-
-    name:name,
-
-    civilization:
-      document
-        .getElementById("dbCiv")
-        .value,
-
-    cost:
-      document
-        .getElementById("dbCost")
-        .value,
-
-    type:
-      document
-        .getElementById("dbType")
-        .value
-        .trim(),
-
-    race:
-      document
-        .getElementById("dbRace")
-        .value
-        .trim(),
-
-    power:
-      document
-        .getElementById("dbPower")
-        .value
-        .trim(),
-
-    text:
-      document
-        .getElementById("dbText")
-        .value
-        .trim(),
-
-    number:
-      document
-        .getElementById("dbNumber")
-        .value
-        .trim(),
-
-    aiNotes:
-      document
-        .getElementById("dbAiNotes")
-        .value
-        .trim(),
-
-    image:
-      selectedImageData||
-      old?.image||
-      ""
-
-  };
-
-
-  try{
-
-    await putDbCard(card);
-
-    clearDbForm();
-
-    alert(
-      "カードDBへ保存しました。"
-    );
 
   }
 
-  catch(err){
-
-    console.error(err);
-
-    alert(
-      "保存に失敗しました。画像サイズが大きすぎる場合は小さくしてください。"
-    );
-
-  }
-
-}
-
-
-function clearDbForm(){
-
-  [
-    "dbEditId",
-    "dbName",
-    "dbCost",
-    "dbType",
-    "dbRace",
-    "dbPower",
-    "dbText",
-    "dbNumber",
-    "dbAiNotes"
-  ]
-  .forEach(
-    id=>
-      document
-        .getElementById(id)
-        .value=""
-  );
-
-
-  document
-    .getElementById("dbCiv")
-    .value="";
-
-  selectedImageData="";
-
-  document
-    .getElementById("dbImageFile")
-    .value="";
-
-  renderDbImagePreview();
-
-  const lookup = document.getElementById("cardLookupName");
-  const resultsBox = document.getElementById("cardLookupResults");
-
-  if(lookup) lookup.value = "";
-  if(resultsBox) resultsBox.innerHTML = "";
-
-}
-
-
-function editDbCard(id){
-
-  const card=
-    cardDatabase.find(
-      c=>c.id===id
-    );
-
-  if(!card)
-    return;
-
-
-  document
-    .getElementById("dbEditId")
-    .value=card.id;
-
-  document
-    .getElementById("dbName")
-    .value=card.name||"";
-
-  document
-    .getElementById("dbCiv")
-    .value=card.civilization||"";
-
-  document
-    .getElementById("dbCost")
-    .value=card.cost||"";
-
-  document
-    .getElementById("dbType")
-    .value=card.type||"";
-
-  document
-    .getElementById("dbRace")
-    .value=card.race||"";
-
-  document
-    .getElementById("dbPower")
-    .value=card.power||"";
-
-  document
-    .getElementById("dbText")
-    .value=card.text||"";
-
-  document
-    .getElementById("dbNumber")
-    .value=card.number||"";
-
-  document
-    .getElementById("dbAiNotes")
-    .value=card.aiNotes||"";
-
-  selectedImageData=
-    card.image||"";
-
-  renderDbImagePreview();
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-
-}
-
-
-async function deleteDbCard(id){
-
-  const card=
-    cardDatabase.find(
-      c=>c.id===id
-    );
-
-  if(!card)
-    return;
-
-  if(
-    !confirm(
-      `「${card.name}」をカードDBから削除しますか？`
-    )
-  )
-    return;
-
-  await removeDbCard(id);
-
-}
-
-
-function renderDatabaseList(){
-
-  const q=
-    (
-      document
-        .getElementById("dbSearch")
-        ?.value||
-      ""
-    )
-    .trim()
-    .toLowerCase();
-
-  const list=
-    document.getElementById(
-      "databaseList"
-    );
-
-  const count=
-    document.getElementById(
-      "dbCount"
-    );
-
-  if(!list||!count)
-    return;
-
-
-  const filtered=
-    cardDatabase.filter(
-      c=>
-        [
-          c.name,
-          c.race,
-          c.text,
-          c.number
-        ]
-        .join(" ")
-        .toLowerCase()
-        .includes(q)
-    );
-
-
-  count.textContent=
-    filtered.length;
-
-  list.innerHTML="";
-
-
-  if(!filtered.length){
-
-    list.innerHTML=
-      '<div class="empty">登録済みカードがありません。</div>';
-
-    return;
-  }
-
-
-  filtered.forEach(
+  results.forEach(
     card=>{
 
-      const row=
+      const row =
         document.createElement(
           "div"
         );
 
-      row.className="db-row";
+      row.className =
+        "db-row";
 
-      row.innerHTML=`
+      row.innerHTML = `
 
         ${
           card.image
-            ?`<img
-                class="db-thumb"
-                src="${escapeHtml(card.image)}"
-                alt="${escapeHtml(card.name)}"
-              >`
-            :`<div class="db-thumb"></div>`
+            ? `<img
+                 class="db-thumb"
+                 src="${escapeHtml(card.image)}"
+                 alt="${escapeHtml(card.name)}">`
+            : `<div class="db-thumb"></div>`
         }
-
 
         <div class="db-main">
 
@@ -2612,36 +2248,32 @@ function renderDatabaseList(){
 
           <div class="muted">
 
-            ${escapeHtml(card.civilization||"-")}
+            ${escapeHtml(
+              card.civilization || "-"
+            )}
             /
-            コスト ${escapeHtml(card.cost||"-")}
+            コスト
+            ${escapeHtml(
+              card.cost || "-"
+            )}
             /
-            ${escapeHtml(card.type||"-")}
+            ${escapeHtml(
+              card.type || "-"
+            )}
 
           </div>
 
         </div>
 
-
-        <div>
-
-          <button
-            class="small light"
-            onclick="editDbCard('${escapeHtml(card.id)}')">
-            編集
-          </button>
-
-          <button
-            class="small danger"
-            onclick="deleteDbCard('${escapeHtml(card.id)}')">
-            削除
-          </button>
-
-        </div>
+        <button
+          class="small"
+          onclick="applyCatalogCard('${escapeHtml(card.id)}')">
+          このカードを入力
+        </button>
 
       `;
 
-      list.appendChild(row);
+      resultsBox.appendChild(row);
 
     }
   );
@@ -2649,7 +2281,111 @@ function renderDatabaseList(){
 }
 
 
-function downloadText(
+function applyCatalogCard(cardId){
+
+  const card =
+    findCardById(cardId);
+
+  if(!card){
+
+    alert(
+      "カード情報が見つかりません。"
+    );
+
+    return;
+
+  }
+
+  document
+    .getElementById(
+      "dbEditId"
+    )
+    .value="";
+
+  document
+    .getElementById(
+      "dbName"
+    )
+    .value =
+      card.name || "";
+
+  document
+    .getElementById(
+      "dbCiv"
+    )
+    .value =
+      Array.isArray(
+        card.civilization
+      )
+        ? card.civilization[0] || ""
+        : card.civilization || "";
+
+  document
+    .getElementById(
+      "dbCost"
+    )
+    .value =
+      card.cost ?? "";
+
+  document
+    .getElementById(
+      "dbType"
+    )
+    .value =
+      card.type || "";
+
+  document
+    .getElementById(
+      "dbRace"
+    )
+    .value =
+      Array.isArray(card.race)
+        ? card.race.join("・")
+        : card.race || "";
+
+  document
+    .getElementById(
+      "dbPower"
+    )
+    .value =
+      card.power ?? "";
+
+  document
+    .getElementById(
+      "dbText"
+    )
+    .value =
+      card.text || "";
+
+  document
+    .getElementById(
+      "dbNumber"
+    )
+    .value =
+      card.number || "";
+
+  document
+    .getElementById(
+      "dbAiNotes"
+    )
+    .value =
+      card.aiNotes ||
+      (
+        card.ai
+          ? JSON.stringify(
+              card.ai,
+              null,
+              2
+            )
+          : ""
+      );
+
+  selectedImageData =
+    card.image || "";
+
+  renderDbImagePreview();
+
+}function downloadText(
   filename,
   text,
   type="application/json"
@@ -2691,10 +2427,13 @@ function exportDatabase(){
     JSON.stringify(
       {
         version:1,
+
         exportedAt:
           new Date().toISOString(),
+
         cards:cardDatabase
       },
+
       null,
       2
     )
@@ -2732,12 +2471,16 @@ async function importDatabaseFile(event){
       const raw of cards
     ){
 
-      if(raw.name)
+      if(raw.name){
+
         await putDbCard({
           ...raw,
+
           id:
             raw.id||uid()
         });
+
+      }
 
     }
 
@@ -2801,20 +2544,28 @@ function exportCurrentDeck(){
 
 
   downloadText(
+
     `${safeName}.json`,
 
     JSON.stringify(
       {
         version:1,
+
         exportedAt:
           new Date().toISOString(),
+
         deckName:deck.name,
-        total:getDeckTotal(deck),
+
+        total:
+          getDeckTotal(deck),
+
         cards:expanded
       },
+
       null,
       2
     )
+
   );
 
 }
@@ -2857,232 +2608,351 @@ async function init(){
 
   renderDbImagePreview();
 
-}
+}// ========================================
+// ⑤ アプリ起動・画面連携
+// ========================================
 
+function updateFirebaseAuthUI(user){
 
-window.updateFirebaseAuthUI=
-function(user){
+  const loginScreen =
+    document.getElementById("screen-login");
 
-  const login=
-    document.getElementById(
-      "screen-login"
-    );
+  const appScreens =
+    document.getElementById("appScreens");
 
-  const app=
-    document.getElementById(
-      "appScreens"
-    );
-
-  const status=
-    document.getElementById(
-      "authStatus"
-    );
-
-  const logout=
-    document.getElementById(
-      "logoutButton"
-    );
+  if(!loginScreen || !appScreens)
+    return;
 
 
   if(user){
 
-    login.classList.remove(
-      "active"
-    );
+    loginScreen.classList.remove("active");
 
-    app.style.display="block";
-
-    status.textContent=
-      user.email||
-      "ログイン中";
-
-    logout.style.display=
-      "inline-block";
+    appScreens.style.display = "block";
 
     showScreen("home");
 
-    init();
+  }else{
+
+    loginScreen.classList.add("active");
+
+    appScreens.style.display = "none";
 
   }
 
-  else{
+}
 
+
+// Firebaseログイン
+async function loginUser(){
+
+  const email =
     document
-      .querySelectorAll(
-        "#appScreens .screen"
-      )
-      .forEach(
-        s=>
-          s.classList.remove(
-            "active"
-          )
-      );
-
-    app.style.display="none";
-
-    login.classList.add(
-      "active"
-    );
-
-    status.textContent=
-      "未ログイン";
-
-    logout.style.display=
-      "none";
-
-  }
-
-};
-
-
-window.loginUser=
-async function(){
-
-  const email=
-    document
-      .getElementById(
-        "loginEmail"
-      )
+      .getElementById("loginEmail")
       .value
       .trim();
 
-  const password=
+  const password =
     document
-      .getElementById(
-        "loginPassword"
-      )
+      .getElementById("loginPassword")
       .value;
 
-  const msg=
+
+  const message =
     document.getElementById(
       "loginMessage"
     );
 
 
-  if(!email||!password){
+  if(!email || !password){
 
-    msg.textContent=
+    message.textContent =
       "メールアドレスとパスワードを入力してください。";
-
-    msg.style.display="block";
 
     return;
 
   }
 
 
-  const r=
+  message.textContent =
+    "ログインしています……";
+
+
+  const result =
     await window.firebaseLogin(
       email,
       password
     );
 
 
-  if(!r.success){
+  if(result.success){
 
-    msg.textContent=
-      "ログインできませんでした。メールアドレスまたはパスワードを確認してください。";
+    message.textContent =
+      "ログインしました。";
 
-    msg.style.display="block";
+  }else{
+
+    message.textContent =
+      "ログインに失敗しました。";
+
+    console.error(
+      result.code,
+      result.message
+    );
 
   }
 
-  else{
-
-    msg.style.display="none";
-
-  }
-
-};
+}
 
 
-window.registerUser=
-async function(){
+// Firebase新規登録
+async function registerUser(){
 
-  const email=
+  const email =
     document
-      .getElementById(
-        "loginEmail"
-      )
+      .getElementById("loginEmail")
       .value
       .trim();
 
-  const password=
+  const password =
     document
-      .getElementById(
-        "loginPassword"
-      )
+      .getElementById("loginPassword")
       .value;
 
-  const msg=
+
+  const message =
     document.getElementById(
       "loginMessage"
     );
 
 
-  if(!email||!password){
+  if(!email || !password){
 
-    msg.textContent=
+    message.textContent =
       "メールアドレスとパスワードを入力してください。";
 
-    msg.style.display="block";
-
     return;
 
   }
 
 
-  if(password.length<6){
+  if(password.length < 6){
 
-    msg.textContent=
+    message.textContent =
       "パスワードは6文字以上にしてください。";
 
-    msg.style.display="block";
-
     return;
 
   }
 
 
-  const r=
+  message.textContent =
+    "アカウントを作成しています……";
+
+
+  const result =
     await window.firebaseRegister(
       email,
       password
     );
 
 
-  if(!r.success){
+  if(result.success){
 
-    msg.textContent=
-      "新規登録できませんでした。入力内容を確認してください。";
+    message.textContent =
+      "登録しました。";
 
-    msg.style.display="block";
+  }else{
+
+    message.textContent =
+      "新規登録に失敗しました。";
+
+    console.error(
+      result.code,
+      result.message
+    );
 
   }
 
-  else{
+}
 
-    msg.style.display="none";
+
+// ログアウト
+async function logoutUser(){
+
+  if(
+    !window.firebaseLogout
+  )
+    return;
+
+
+  const result =
+    await window.firebaseLogout();
+
+
+  if(!result.success){
+
+    console.error(
+      result.code,
+      result.message
+    );
 
   }
 
-};
+}
 
 
-window.logoutUser=
-async function(){
+// カードDB検索
+function searchCardCatalog(){
 
-  await window.firebaseLogout();
+  const input =
+    document.getElementById(
+      "cardCatalogSearch"
+    );
 
-};
+  const resultsBox =
+    document.getElementById(
+      "cardLookupResults"
+    );
 
-</script>
+
+  if(!input || !resultsBox)
+    return;
 
 
-<script
-  type="module"
-  src="firebase-auth.js">
-</script>
+  const q =
+    input.value
+      .trim()
+      .toLowerCase();
 
-</body>
-</html>
+
+  if(!q){
+
+    resultsBox.innerHTML =
+      '<div class="empty">カード名を入力してください。</div>';
+
+    return;
+
+  }
+
+
+  const results =
+    cardDatabase
+      .filter(card => {
+
+        const name =
+          String(
+            card.name || ""
+          )
+          .toLowerCase();
+
+        return name.includes(q);
+
+      })
+      .slice(0,20);
+
+
+  resultsBox.innerHTML="";
+
+
+  if(!results.length){
+
+    resultsBox.innerHTML =
+      '<div class="empty">一致するカードがありません。</div>';
+
+    return;
+
+  }
+
+
+  results.forEach(card => {
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+
+    row.className =
+      "db-row";
+
+
+    row.innerHTML = `
+
+      ${
+        card.image
+          ? `
+            <img
+              class="db-thumb"
+              src="${escapeHtml(card.image)}"
+              alt="${escapeHtml(card.name)}"
+            >
+          `
+          : `
+            <div class="db-thumb"></div>
+          `
+      }
+
+
+      <div class="db-main">
+
+        <strong>
+          ${escapeHtml(card.name)}
+        </strong>
+
+        <div class="muted">
+
+          ${escapeHtml(
+            card.civilization || "-"
+          )}
+
+          ／ コスト
+
+          ${escapeHtml(
+            card.cost || "-"
+          )}
+
+          ／
+
+          ${escapeHtml(
+            card.type || "-"
+          )}
+
+        </div>
+
+      </div>
+
+
+      <button
+        class="small"
+        onclick="applyCatalogCard('${escapeHtml(card.id)}')">
+
+        このカードを入力
+
+      </button>
+
+    `;
+
+
+    resultsBox.appendChild(row);
+
+  });
+
+}
+
+
+// ページ読み込み完了後にアプリを起動
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    init();
+
+  }
+);
+
+
+// Firebaseのログイン状態変更を
+// この画面へ反映
+window.updateFirebaseAuthUI =
+  updateFirebaseAuthUI;
