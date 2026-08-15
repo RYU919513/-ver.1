@@ -1,6 +1,8 @@
 // Firebase Authentication + Firestore
 // デュエマ デッキ管理アプリ
 
+import "./card-validator.js";
+
 import {
   initializeApp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
