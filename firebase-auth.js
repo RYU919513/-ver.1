@@ -1,4 +1,4 @@
-// Firebase Authentication
+// Firebase Authentication + Firestore
 // デュエマ デッキ管理アプリ
 
 import {
@@ -13,6 +13,16 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+
 // Firebaseの設定
 const firebaseConfig = {
   apiKey: "AIzaSyBeUx8AOPlyDCYwZUDmw_ZSelG3lfJT80U",
@@ -23,9 +33,12 @@ const firebaseConfig = {
   appId: "1:536980406115:web:734f25019a17ee34c71d56"
 };
 
+
 // Firebaseを初期化
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
+
 
 // ログイン状態
 onAuthStateChanged(auth, (user) => {
@@ -35,6 +48,11 @@ onAuthStateChanged(auth, (user) => {
     window.updateFirebaseAuthUI(user || null);
   }
 });
+
+
+// ==============================
+// Authentication
+// ==============================
 
 // メールアドレスで新規登録
 window.firebaseRegister = async function(email, password) {
@@ -60,6 +78,7 @@ window.firebaseRegister = async function(email, password) {
   }
 };
 
+
 // メールアドレスでログイン
 window.firebaseLogin = async function(email, password) {
   try {
@@ -84,6 +103,7 @@ window.firebaseLogin = async function(email, password) {
   }
 };
 
+
 // ログアウト
 window.firebaseLogout = async function() {
   try {
@@ -94,6 +114,140 @@ window.firebaseLogout = async function() {
     };
   } catch (error) {
     console.error("Firebaseログアウトエラー:", error);
+
+    return {
+      success: false,
+      code: error.code,
+      message: error.message
+    };
+  }
+};
+
+
+// ==============================
+// Firestore
+// ==============================
+
+// デッキを保存
+window.firebaseSaveDeck = async function(deck) {
+  const user = window.currentFirebaseUser;
+
+  if (!user) {
+    return {
+      success: false,
+      message: "ログインしていません。"
+    };
+  }
+
+  try {
+    const deckRef = doc(
+      db,
+      "users",
+      user.uid,
+      "decks",
+      deck.id
+    );
+
+    await setDoc(deckRef, {
+      id: deck.id,
+      name: deck.name,
+      cards: deck.cards || [],
+      updatedAt: new Date().toISOString()
+    });
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error("デッキ保存エラー:", error);
+
+    return {
+      success: false,
+      code: error.code,
+      message: error.message
+    };
+  }
+};
+
+
+// 自分のデッキを全部読み込む
+window.firebaseLoadDecks = async function() {
+  const user = window.currentFirebaseUser;
+
+  if (!user) {
+    return {
+      success: false,
+      decks: [],
+      message: "ログインしていません。"
+    };
+  }
+
+  try {
+    const decksRef = collection(
+      db,
+      "users",
+      user.uid,
+      "decks"
+    );
+
+    const snapshot = await getDocs(decksRef);
+
+    const decks = [];
+
+    snapshot.forEach((docSnapshot) => {
+      const data = docSnapshot.data();
+
+      decks.push({
+        id: data.id || docSnapshot.id,
+        name: data.name || "無題のデッキ",
+        cards: Array.isArray(data.cards) ? data.cards : []
+      });
+    });
+
+    return {
+      success: true,
+      decks
+    };
+  } catch (error) {
+    console.error("デッキ読み込みエラー:", error);
+
+    return {
+      success: false,
+      decks: [],
+      code: error.code,
+      message: error.message
+    };
+  }
+};
+
+
+// デッキを削除
+window.firebaseDeleteDeck = async function(deckId) {
+  const user = window.currentFirebaseUser;
+
+  if (!user) {
+    return {
+      success: false,
+      message: "ログインしていません。"
+    };
+  }
+
+  try {
+    const deckRef = doc(
+      db,
+      "users",
+      user.uid,
+      "decks",
+      deckId
+    );
+
+    await deleteDoc(deckRef);
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error("デッキ削除エラー:", error);
 
     return {
       success: false,
