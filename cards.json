@@ -1,19 +1,145 @@
+ライブラリ
+/
+cards_redzone_5.json
+
+
 [
   {
-    "id": "test-001",
-    "name": "テスト・ドラゴン",
-    "civilization": ["火"],
-    "type": "クリーチャー",
-    "race": ["ドラゴン"],
-    "cost": 5,
-    "power": 6000,
-    "text": "テスト用のカードです。",
+    "id": "dmr17-l02",
+    "name": "轟く侵略 レッドゾーン",
+    "civilization": [
+      "火"
+    ],
+    "type": "進化クリーチャー",
+    "race": [
+      "ソニック・コマンド",
+      "侵略者"
+    ],
+    "cost": 6,
+    "power": 12000,
+    "text": "進化：自分の火のクリーチャー１体の上に置く。\n侵略：火のコマンド（自分の火のコマンドが攻撃する時、自分の手札にあるこのクリーチャーをその上に重ねてもよい）\nT・ブレイカー\nこのクリーチャーがバトルゾーンに出た時、一番パワーが大きい相手のクリーチャーをすべて破壊する。",
+    "number": "DMR17 L2/L2",
     "image": "",
     "ai": {
-      "breaker": 1,
+      "breaker": 3,
       "speedAttacker": false,
       "shieldTrigger": false,
-      "effects": []
+      "effects": [
+        "evolution",
+        "invasion",
+        "destroy_highest_power_opponents"
+      ]
+    }
+  },
+  {
+    "id": "dmd27-014",
+    "name": "熱き侵略 レッドゾーンZ",
+    "civilization": [
+      "火"
+    ],
+    "type": "進化クリーチャー",
+    "race": [
+      "ソニック・コマンド",
+      "侵略者"
+    ],
+    "cost": 6,
+    "power": 11000,
+    "text": "進化―自分の火のクリーチャー１体の上に置く。\n侵略―火のコマンド（自分の火のコマンドが攻撃する時、自分の手札にあるこのクリーチャーをその上に重ねてもよい）\nW・ブレイカー\nこのクリーチャーを進化ではないクリーチャーの上に置いた時、相手のシールドをひとつ選び、持ち主の墓地に置く。",
+    "number": "DMD27 14/20",
+    "image": "",
+    "ai": {
+      "breaker": 2,
+      "speedAttacker": false,
+      "shieldTrigger": false,
+      "effects": [
+        "evolution",
+        "invasion",
+        "destroy_one_shield"
+      ]
+    }
+  },
+  {
+    "id": "dmr20-s09",
+    "name": "禁断の轟速 レッドゾーンX",
+    "civilization": [
+      "闇",
+      "火"
+    ],
+    "type": "進化クリーチャー",
+    "race": [
+      "ソニック・コマンド",
+      "S級侵略者",
+      "イニシャルズ"
+    ],
+    "cost": 6,
+    "power": 8000,
+    "text": "進化―自分の闇または火のクリーチャー１体の上に置く。\nS級侵略 [轟速]―闇または火のコマンド（自分の闇または火のコマンドが攻撃する時、自分の手札か墓地、またはバトルゾーンにあるこのクリーチャーをその上に重ねてもよい）\nW・ブレイカー\nこのクリーチャーがバトルゾーンに出た時、相手のクリーチャーを１体選び、相手はそれに封印をひとつ付ける。",
+    "number": "DMR20 S9/S9",
+    "image": "",
+    "ai": {
+      "breaker": 2,
+      "speedAttacker": false,
+      "shieldTrigger": false,
+      "effects": [
+        "evolution",
+        "s_class_invasion",
+        "seal_one_opponent"
+      ]
+    }
+  },
+  {
+    "id": "dm22ex1-011",
+    "name": "覇帝なき侵略 レッドゾーンF",
+    "civilization": [
+      "火"
+    ],
+    "type": "進化クリーチャー",
+    "race": [
+      "ソニック・コマンド",
+      "侵略者"
+    ],
+    "cost": 6,
+    "power": 11000,
+    "text": "進化：火のクリーチャー１体の上に置く。\n侵略：火のコマンド（自分の火のコマンドが攻撃する時、自分の手札にあるこのクリーチャーをその上に重ねてもよい）\nW・ブレイカー\nこのクリーチャーの攻撃中、相手は「G・ストライク」を使えない。\n各ターン、このクリーチャーの最初の攻撃の終わりに、このクリーチャーをアンタップし、一番上のカードを破壊する。",
+    "number": "DM22EX1 11/130",
+    "image": "",
+    "ai": {
+      "breaker": 2,
+      "speedAttacker": false,
+      "shieldTrigger": false,
+      "effects": [
+        "evolution",
+        "invasion",
+        "disable_g_strike",
+        "untap_and_destroy_top_card"
+      ]
+    }
+  },
+  {
+    "id": "dmex12-037",
+    "name": "超轟速 レッド・エンド",
+    "civilization": [
+      "火"
+    ],
+    "type": "進化クリーチャー",
+    "race": [
+      "ソニック・コマンド",
+      "侵略者"
+    ],
+    "cost": 5,
+    "power": 6000,
+    "text": "進化：自分の火のクリーチャー１体の上に置く。\n侵略：火のコマンド（自分の火のコマンドが攻撃する時、自分の手札にあるこのクリーチャーをその上に重ねてもよい）\nW・ブレイカー\nこのクリーチャーが破壊された時、その下に重ねてあったカードのうち１枚を、墓地からバトルゾーンに出してもよい。",
+    "number": "DMEX12 37/110",
+    "image": "",
+    "ai": {
+      "breaker": 2,
+      "speedAttacker": false,
+      "shieldTrigger": false,
+      "effects": [
+        "evolution",
+        "invasion",
+        "revive_card_under_this"
+      ]
     }
   }
 ]
