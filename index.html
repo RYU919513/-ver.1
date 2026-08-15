@@ -735,6 +735,25 @@
       画像は端末内に保存します。
     </div>
 
+    <div class="panel" style="margin-top:12px;background:#f9fafb;">
+      <h3>🔎 カード名から自動入力</h3>
+      <div class="muted" style="margin-bottom:8px;">
+        cards.json に登録されているカード名を検索して、カード情報を自動入力できます。
+      </div>
+      <div class="row">
+        <div class="grow">
+          <input
+            id="cardLookupName"
+            type="search"
+            placeholder="例：テスト・ドラゴン"
+            oninput="searchCardCatalog()"
+          />
+        </div>
+        <button class="secondary" onclick="searchCardCatalog()">検索</button>
+      </div>
+      <div id="cardLookupResults" class="db-list" style="margin-top:10px;"></div>
+    </div>
+
     <input
       id="dbEditId"
       type="hidden"
@@ -1053,27 +1072,13 @@ function loadDecks(){
 }
 
 
-async function saveDecks(){
+function saveDecks(){
+
   localStorage.setItem(
     DECKS_KEY,
     JSON.stringify(decks)
   );
 
-  const user = window.currentFirebaseUser;
-  if (!user || typeof window.firebaseSaveDeck !== "function") {
-    return;
-  }
-
-  try {
-    for (const deck of decks) {
-      const result = await window.firebaseSaveDeck(deck);
-      if (!result.success) {
-        console.error("Firestoreデッキ保存エラー:", result.message);
-      }
-    }
-  } catch (error) {
-    console.error("Firestoreデッキ保存エラー:", error);
-  }
 }
 
 
@@ -1167,33 +1172,42 @@ function backFromDatabase(){
 }
 
 
-async function createDeck(){
-  const input=document.getElementById("newDeckName");
-  const name=input.value.trim();
+function createDeck(){
+
+  const input=
+    document.getElementById(
+      "newDeckName"
+    );
+
+  const name=
+    input.value.trim();
 
   if(!name){
-    alert("デッキ名を入力してください。");
+
+    alert(
+      "デッキ名を入力してください。"
+    );
+
     return;
   }
 
-  const deck={
-    id:"d_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7),
-    name:name,
-    cards:[]
-  };
+  decks.push({
 
-  decks.push(deck);
+    id:"d_"+
+      Date.now().toString(36),
+
+    name:name,
+
+    cards:[]
+
+  });
+
   input.value="";
+
   saveDecks();
+
   renderDecks();
 
-  if (window.currentFirebaseUser && typeof window.firebaseSaveDeck === "function") {
-    const result = await window.firebaseSaveDeck(deck);
-    if (!result.success) {
-      alert("デッキは端末には保存されましたが、クラウド保存に失敗しました。");
-      console.error(result);
-    }
-  }
 }
 
 
@@ -1438,76 +1452,127 @@ function createDeckCardElement(
 }
 
 
-async function changeDeckQty(index, delta){
-  const deck=decks[currentDeckIndex];
-  const item=deck?.cards?.[index];
+function changeDeckQty(
+  index,
+  delta
+){
 
-  if(!item) return;
+  const deck=
+    decks[currentDeckIndex];
 
-  const total=getDeckTotal(deck);
+  const item=
+    deck.cards[index];
 
-  if(delta>0 && item.qty>=4){
-    alert("現在は同名カード4枚までの設定です。");
+  if(!item)
+    return;
+
+  const total=
+    getDeckTotal(deck);
+
+  if(
+    delta>0 &&
+    item.qty>=4
+  ){
+
+    alert(
+      "現在は同名カード4枚までの設定です。"
+    );
+
     return;
   }
 
-  if(delta>0 && total>=40){
-    alert("デッキは40枚までです。");
+  if(
+    delta>0 &&
+    total>=40
+  ){
+
+    alert(
+      "デッキは40枚までです。"
+    );
+
     return;
   }
 
   item.qty+=delta;
 
   if(item.qty<=0){
-    deck.cards.splice(index,1);
+
+    deck.cards.splice(
+      index,
+      1
+    );
+
   }
 
   saveDecks();
+
   renderDeck();
+
   renderSearch();
 
-  if (window.currentFirebaseUser && typeof window.firebaseSaveDeck === "function") {
-    const result = await window.firebaseSaveDeck(deck);
-    if (!result.success) console.error("Firestore保存エラー:", result);
-  }
 }
 
 
-async function addCardToDeck(cardId){
-  const deck=decks[currentDeckIndex];
-  const card=findCardById(cardId);
+function addCardToDeck(cardId){
 
-  if(!deck||!card) return;
+  const deck=
+    decks[currentDeckIndex];
 
-  if(getDeckTotal(deck)>=40){
-    alert("デッキは40枚までです。");
+  const card=
+    findCardById(cardId);
+
+  if(!deck||!card)
+    return;
+
+  if(
+    getDeckTotal(deck)>=40
+  ){
+
+    alert(
+      "デッキは40枚までです。"
+    );
+
     return;
   }
 
-  const existing=deck.cards.find(x=>x.cardId===cardId);
+  const existing=
+    deck.cards.find(
+      x=>x.cardId===cardId
+    );
 
   if(existing){
+
     if(existing.qty>=4){
-      alert("現在は同名カード4枚までの設定です。");
+
+      alert(
+        "現在は同名カード4枚までの設定です。"
+      );
+
       return;
     }
+
     existing.qty++;
-  } else {
+
+  }
+
+  else{
+
     deck.cards.push({
+
       cardId:cardId,
       name:card.name,
       qty:1
+
     });
+
   }
 
   saveDecks();
+
   renderDeck();
+
   renderSearch();
 
-  if (window.currentFirebaseUser && typeof window.firebaseSaveDeck === "function") {
-    const result = await window.firebaseSaveDeck(deck);
-    if (!result.success) console.error("Firestore保存エラー:", result);
-  }
 }
 
 
@@ -2103,6 +2168,118 @@ function renderDbImagePreview(){
 }
 
 
+function searchCardCatalog(){
+  const input = document.getElementById("cardLookupName");
+  const resultsBox = document.getElementById("cardLookupResults");
+
+  if(!input || !resultsBox) return;
+
+  const q = input.value.trim().toLowerCase();
+
+  if(!q){
+    resultsBox.innerHTML =
+      '<div class="empty">カード名を入力してください。</div>';
+    return;
+  }
+
+  const results = allCards()
+    .filter(card =>
+      String(card.name || "").toLowerCase().includes(q)
+    )
+    .slice(0, 20);
+
+  resultsBox.innerHTML = "";
+
+  if(!results.length){
+    resultsBox.innerHTML =
+      '<div class="empty">一致するカードがありません。</div>';
+    return;
+  }
+
+  results.forEach(card => {
+    const row = document.createElement("div");
+    row.className = "db-row";
+
+    row.innerHTML = `
+      ${
+        card.image
+          ? `<img class="db-thumb"
+                  src="${escapeHtml(card.image)}"
+                  alt="${escapeHtml(card.name)}">`
+          : `<div class="db-thumb"></div>`
+      }
+
+      <div class="db-main">
+        <strong>${escapeHtml(card.name)}</strong>
+        <div class="muted">
+          ${escapeHtml(card.civilization || "-")} /
+          コスト ${escapeHtml(card.cost || "-")} /
+          ${escapeHtml(card.type || "-")}
+        </div>
+      </div>
+
+      <button
+        class="small"
+        onclick="applyCatalogCard('${escapeHtml(card.id)}')">
+        このカードを入力
+      </button>
+    `;
+
+    resultsBox.appendChild(row);
+  });
+}
+
+
+function applyCatalogCard(cardId){
+  const card = findCardById(cardId);
+
+  if(!card){
+    alert("カード情報が見つかりません。");
+    return;
+  }
+
+  document.getElementById("dbEditId").value = "";
+  document.getElementById("dbName").value = card.name || "";
+  document.getElementById("dbCiv").value =
+    Array.isArray(card.civilization)
+      ? card.civilization[0] || ""
+      : card.civilization || "";
+  document.getElementById("dbCost").value = card.cost ?? "";
+  document.getElementById("dbType").value = card.type || "";
+  document.getElementById("dbRace").value =
+    Array.isArray(card.race)
+      ? card.race.join("・")
+      : card.race || "";
+  document.getElementById("dbPower").value = card.power ?? "";
+  document.getElementById("dbText").value = card.text || "";
+  document.getElementById("dbNumber").value = card.number || "";
+
+  document.getElementById("dbAiNotes").value =
+    card.aiNotes ||
+    (card.ai ? JSON.stringify(card.ai, null, 2) : "");
+
+  selectedImageData = card.image || "";
+  renderDbImagePreview();
+
+  const lookup = document.getElementById("cardLookupName");
+  const resultsBox = document.getElementById("cardLookupResults");
+
+  if(lookup){
+    lookup.value = card.name || "";
+  }
+
+  if(resultsBox){
+    resultsBox.innerHTML =
+      '<div class="notice">カード情報を入力しました。内容を確認して「カードをDBへ保存」を押してください。</div>';
+  }
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+
+
 async function saveDatabaseCard(){
 
   const name=
@@ -2252,6 +2429,12 @@ function clearDbForm(){
     .value="";
 
   renderDbImagePreview();
+
+  const lookup = document.getElementById("cardLookupName");
+  const resultsBox = document.getElementById("cardLookupResults");
+
+  if(lookup) lookup.value = "";
+  if(resultsBox) resultsBox.innerHTML = "";
 
 }
 
@@ -2637,57 +2820,43 @@ function exportCurrentDeck(){
 }
 
 
-async function deleteCurrentDeck(){
-  const deck=decks[currentDeckIndex];
+function deleteCurrentDeck(){
 
-  if(!deck) return;
+  const deck=
+    decks[currentDeckIndex];
 
-  if(!confirm(`「${deck.name}」を削除しますか？`)) return;
+  if(!deck)
+    return;
 
-  const deletedDeckId=deck.id;
+  if(
+    !confirm(
+      `「${deck.name}」を削除しますか？`
+    )
+  )
+    return;
 
-  decks.splice(currentDeckIndex,1);
+  decks.splice(
+    currentDeckIndex,
+    1
+  );
+
   saveDecks();
 
-  if (window.currentFirebaseUser && typeof window.firebaseDeleteDeck === "function") {
-    const result = await window.firebaseDeleteDeck(deletedDeckId);
-    if (!result.success) {
-      alert("端末からは削除しましたが、クラウドからの削除に失敗しました。");
-      console.error(result);
-    }
-  }
-
   currentDeckIndex=null;
+
   showScreen("home");
+
 }
 
 
 async function init(){
+
   await loadCardDatabase();
 
-  const user = window.currentFirebaseUser;
-
-  if (user && typeof window.firebaseLoadDecks === "function") {
-    try {
-      const result = await window.firebaseLoadDecks();
-
-      if (result.success) {
-        decks = Array.isArray(result.decks) ? result.decks : [];
-        localStorage.setItem(DECKS_KEY, JSON.stringify(decks));
-      } else {
-        console.error("Firestoreデッキ読み込みエラー:", result);
-      }
-    } catch (error) {
-      console.error("Firestoreデッキ読み込みエラー:", error);
-    }
-  }
-
   renderDecks();
+
   renderDbImagePreview();
 
-  if (currentDeckIndex !== null && !decks[currentDeckIndex]) {
-    currentDeckIndex = null;
-  }
 }
 
 
