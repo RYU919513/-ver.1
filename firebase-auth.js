@@ -154,7 +154,8 @@ window.firebaseSaveDeck = async function(deck) {
       id: deck.id,
       name: deck.name,
       cards: deck.cards || [],
-      updatedAt: new Date().toISOString()
+      updatedAt: deck.updatedAt || new Date().toISOString(),
+      schemaVersion: 1
     });
 
     return {
@@ -202,7 +203,8 @@ window.firebaseLoadDecks = async function() {
       decks.push({
         id: data.id || docSnapshot.id,
         name: data.name || "無題のデッキ",
-        cards: Array.isArray(data.cards) ? data.cards : []
+        cards: Array.isArray(data.cards) ? data.cards : [],
+        updatedAt: data.updatedAt || "1970-01-01T00:00:00.000Z"
       });
     });
 

@@ -63,6 +63,12 @@
       white-space:nowrap;
     }
 
+    .account-label {
+      max-width:240px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
     main {
       max-width:1100px;
       margin:0 auto;
@@ -463,6 +469,10 @@
       color:#991b1b;
     }
 
+    .login-error:not(:empty) {
+      display:block;
+    }
+
     footer {
       text-align:center;
       color:#9ca3af;
@@ -569,6 +579,12 @@
       <button onclick="createDeck()">
         デッキを作成
       </button>
+
+      <label class="file-button">
+        JSONから読み込む
+        <input id="deckImportFile" type="file" accept="application/json,.json"
+          onchange="importDeckFile(event)" />
+      </label>
 
     </div>
 
@@ -797,6 +813,8 @@
   </div>
 
 
+  <div class="panel">
+  <h3>カード情報の登録・編集</h3>
   <input
     id="dbEditId"
     type="hidden"
@@ -956,6 +974,15 @@
       入力をクリア
     </button>
 
+    <button class="light" onclick="exportDatabase()">
+      DBをJSONで書き出す
+    </button>
+
+    <label class="file-button">
+      DBのJSONを読み込む
+      <input type="file" accept="application/json,.json" onchange="importDatabaseFile(event)" />
+    </label>
+
   </div>
 
 </div>
@@ -1040,10 +1067,12 @@
 <script>
 
 const DECKS_KEY="dm_decks_v4";
+const DECKS_MIGRATION_KEY="dm_decks_v4_migrated";
 const DB_NAME="dm_card_database";
 const DB_VERSION=1;
 const STORE_NAME="cards";
 
+let deckStorageKey=DECKS_KEY;
 let decks=loadDecks();
 let currentDeckIndex=null;
 let cardDatabase=[];
@@ -1104,9 +1133,13 @@ function normalizeCard(card){
 function loadDecks(){
 
   try{
-    return JSON.parse(
-      localStorage.getItem(DECKS_KEY)
-    )||[];
+    const saved=JSON.parse(
+      localStorage.getItem(deckStorageKey||DECKS_KEY)
+    );
+
+    return Array.isArray(saved)
+      ? saved.map(normalizeDeck).filter(Boolean)
+      : [];
   }
 
   catch{
@@ -1119,9 +1152,44 @@ function loadDecks(){
 function saveDecks(){
 
   localStorage.setItem(
-    DECKS_KEY,
+    deckStorageKey,
     JSON.stringify(decks)
   );
+
+  const deck=
+    currentDeckIndex!==null
+      ? decks[currentDeckIndex]
+      : null;
+
+  if(deck && window.currentFirebaseUser && window.firebaseSaveDeck){
+    window.firebaseSaveDeck(deck).then(result=>{
+      if(!result.success)
+        console.warn("デッキのクラウド保存に失敗しました。",result.message);
+    });
+  }
+
+}
+
+
+function normalizeDeck(raw){
+
+  if(!raw || typeof raw!=="object") return null;
+
+  const cards=Array.isArray(raw.cards)
+    ? raw.cards
+      .map(item=>({
+        cardId:String(item?.cardId||item?.card?.id||""),
+        qty:Number(item?.qty)||0
+      }))
+      .filter(item=>item.cardId && item.qty>0)
+    : [];
+
+  return {
+    id:String(raw.id||"d_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+    name:String(raw.name||raw.deckName||"無題のデッキ"),
+    cards,
+    updatedAt:String(raw.updatedAt||new Date().toISOString())
+  };
 
 }
 
@@ -1242,13 +1310,19 @@ function createDeck(){
 
     name:name,
 
-    cards:[]
+    cards:[],
+
+    updatedAt:new Date().toISOString()
 
   });
 
   input.value="";
 
   saveDecks();
+
+  const createdDeck=decks[decks.length-1];
+  if(window.currentFirebaseUser && window.firebaseSaveDeck)
+    window.firebaseSaveDeck(createdDeck);
 
   renderDecks();
 
@@ -1353,7 +1427,7 @@ function deleteDeck(index){
   const deck=decks[index];
 
   if(!deck)
-    return;
+    return false;
 
   if(
     !confirm(
@@ -1365,23 +1439,18 @@ function deleteDeck(index){
 
   decks.splice(index,1);
 
+  if(window.currentFirebaseUser && window.firebaseDeleteDeck){
+    window.firebaseDeleteDeck(deck.id).then(result=>{
+      if(!result.success)
+        console.warn("デッキのクラウド削除に失敗しました。",result.message);
+    });
+  }
+
   saveDecks();
 
   renderDecks();
 
-}
-
-
-function deleteCurrentDeck(){
-
-  if(currentDeckIndex===null)
-    return;
-
-  deleteDeck(currentDeckIndex);
-
-  currentDeckIndex=null;
-
-  showScreen("home");
+  return true;
 
 }
 
@@ -1726,6 +1795,8 @@ function addCardToDeck(cardId){
 
   }
 
+  deck.updatedAt=new Date().toISOString();
+
   saveDecks();
 
   renderDeck();
@@ -1791,6 +1862,8 @@ function changeDeckCard(
     item.qty=next;
 
   }
+
+  deck.updatedAt=new Date().toISOString();
 
   saveDecks();
 
@@ -2050,7 +2123,10 @@ async function putDbCard(card){
           STORE_NAME
         )
         .put(
-          normalizeCard(card)
+          normalizeCard({
+            ...card,
+            locallyManaged:true
+          })
         );
 
       tx.oncomplete=resolve;
@@ -2162,6 +2238,122 @@ function renderDbImagePreview(){
           alt="preview"
         >`
       :"画像なし";
+
+}
+
+
+function findCardById(cardId){
+
+  return cardDatabase.find(card=>card.id===cardId)||null;
+
+}
+
+
+function allCards(){
+
+  return cardDatabase.slice();
+
+}
+
+
+function clearDbForm(){
+
+  ["dbEditId","dbName","dbCost","dbType","dbRace","dbPower","dbText","dbNumber","dbAiNotes"]
+    .forEach(id=>document.getElementById(id).value="");
+  document.getElementById("dbCiv").value="";
+  clearSelectedImage();
+
+}
+
+
+function editDatabaseCard(cardId){
+
+  const card=findCardById(cardId);
+  if(!card) return;
+  applyCatalogCard(cardId);
+  document.getElementById("dbEditId").value=card.id;
+  window.scrollTo({top:document.getElementById("dbName").offsetTop-90,behavior:"smooth"});
+
+}
+
+
+async function saveDatabaseCard(){
+
+  const name=document.getElementById("dbName").value.trim();
+  if(!name){
+    alert("カード名を入力してください。");
+    return;
+  }
+
+  const editId=document.getElementById("dbEditId").value;
+  const original=editId ? findCardById(editId) : null;
+  const numberValue=id=>document.getElementById(id).value.trim();
+  const card=normalizeCard({
+    ...(original||{}),
+    id:editId||uid(),
+    name,
+    civilization:document.getElementById("dbCiv").value,
+    cost:numberValue("dbCost")==="" ? "" : Number(numberValue("dbCost")),
+    type:numberValue("dbType"),
+    race:numberValue("dbRace"),
+    power:numberValue("dbPower")==="" ? "" : Number(numberValue("dbPower")),
+    text:document.getElementById("dbText").value.trim(),
+    number:numberValue("dbNumber"),
+    aiNotes:document.getElementById("dbAiNotes").value.trim(),
+    image:selectedImageData,
+    locallyManaged:true,
+    updatedAt:new Date().toISOString()
+  });
+
+  try{
+    await putDbCard(card);
+    clearDbForm();
+    alert("カード情報をこの端末に保存しました。");
+  }catch(error){
+    console.error(error);
+    alert("カード情報の保存に失敗しました。");
+  }
+
+}
+
+
+async function deleteDatabaseCard(cardId){
+
+  const card=findCardById(cardId);
+  if(!card || !card.locallyManaged) return;
+  if(!confirm(`「${card.name}」の端末保存データを削除しますか？`)) return;
+  await removeDbCard(cardId);
+
+}
+
+
+function renderDatabaseList(){
+
+  const box=document.getElementById("databaseList");
+  if(!box) return;
+  const q=document.getElementById("dbSearch").value.trim().toLowerCase();
+  const results=cardDatabase.filter(card=>[
+    card.name,card.number,card.civilization,card.type,card.race
+  ].join(" ").toLowerCase().includes(q));
+  document.getElementById("dbCount").textContent=String(results.length);
+  box.innerHTML="";
+
+  if(!results.length){
+    box.innerHTML='<div class="empty">登録されたカードがありません。</div>';
+    return;
+  }
+
+  results.forEach(card=>{
+    const row=document.createElement("div");
+    row.className="db-row";
+    row.innerHTML=`
+      ${card.image ? `<img class="db-thumb" src="${escapeHtml(card.image)}" alt="${escapeHtml(card.name)}">` : '<div class="db-thumb"></div>'}
+      <div class="db-main"><strong>${escapeHtml(card.name)}</strong>
+        <div class="muted">${escapeHtml(card.number||"番号未設定")} ／ ${escapeHtml(card.civilization||"文明未設定")} ／ ${card.locallyManaged ? "端末で編集済み" : "cards.json"}</div></div>
+      <div class="row"><button class="small" onclick="editDatabaseCard('${escapeHtml(card.id)}')">編集</button>
+      ${card.locallyManaged ? `<button class="small danger" onclick="deleteDatabaseCard('${escapeHtml(card.id)}')">削除</button>` : ""}</div>`;
+    box.appendChild(row);
+  });
 
 }
 
@@ -2571,31 +2763,47 @@ function exportCurrentDeck(){
 }
 
 
+async function importDeckFile(event){
+
+  const file=event.target.files?.[0];
+  if(!file) return;
+
+  try{
+    const parsed=JSON.parse(await file.text());
+    const deck=normalizeDeck(parsed.deck||parsed);
+    if(!deck || !deck.name || !deck.cards.length)
+      throw new Error("デッキ形式が不正です。");
+    if(getDeckTotal(deck)>40)
+      throw new Error("デッキが40枚を超えています。");
+    if(deck.cards.some(item=>item.qty>4))
+      throw new Error("同じカードが4枚を超えています。");
+
+    deck.id="d_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    deck.updatedAt=new Date().toISOString();
+    decks.push(deck);
+    localStorage.setItem(deckStorageKey,JSON.stringify(decks));
+    if(window.currentFirebaseUser && window.firebaseSaveDeck)
+      await window.firebaseSaveDeck(deck);
+    renderDecks();
+    alert(`「${deck.name}」を読み込みました。`);
+  }catch(error){
+    console.error(error);
+    alert(error.message||"デッキJSONを読み込めませんでした。");
+  }finally{
+    event.target.value="";
+  }
+
+}
+
+
 function deleteCurrentDeck(){
 
-  const deck=
-    decks[currentDeckIndex];
-
-  if(!deck)
-    return;
-
-  if(
-    !confirm(
-      `「${deck.name}」を削除しますか？`
-    )
-  )
-    return;
-
-  decks.splice(
-    currentDeckIndex,
-    1
-  );
-
-  saveDecks();
-
-  currentDeckIndex=null;
-
-  showScreen("home");
+  if(currentDeckIndex===null) return;
+  const index=currentDeckIndex;
+  if(deleteDeck(index)){
+    currentDeckIndex=null;
+    showScreen("home");
+  }
 
 }
 
@@ -2612,7 +2820,7 @@ async function init(){
 // ⑤ アプリ起動・画面連携
 // ========================================
 
-function updateFirebaseAuthUI(user){
+async function updateFirebaseAuthUI(user){
 
   const loginScreen =
     document.getElementById("screen-login");
@@ -2620,11 +2828,35 @@ function updateFirebaseAuthUI(user){
   const appScreens =
     document.getElementById("appScreens");
 
+  const authStatus=document.getElementById("authStatus");
+  const logoutButton=document.getElementById("logoutButton");
+
   if(!loginScreen || !appScreens)
     return;
 
 
   if(user){
+
+    authStatus.textContent=user.email||"ログイン済み";
+    authStatus.classList.add("account-label");
+    logoutButton.style.display="inline-block";
+
+    deckStorageKey=`${DECKS_KEY}_${user.uid}`;
+    const userDecks=localStorage.getItem(deckStorageKey);
+    if(userDecks!==null){
+      try{
+        const parsed=JSON.parse(userDecks);
+        decks=Array.isArray(parsed) ? parsed.map(normalizeDeck).filter(Boolean) : [];
+      }catch(error){
+        console.warn("端末のデッキデータを読み込めませんでした。",error);
+        decks=[];
+      }
+    }else if(!localStorage.getItem(DECKS_MIGRATION_KEY)){
+      localStorage.setItem(DECKS_MIGRATION_KEY,user.uid);
+      localStorage.setItem(deckStorageKey,JSON.stringify(decks));
+    }else{
+      decks=[];
+    }
 
     loginScreen.classList.remove("active");
 
@@ -2632,7 +2864,31 @@ function updateFirebaseAuthUI(user){
 
     showScreen("home");
 
+    if(window.firebaseLoadDecks){
+      const result=await window.firebaseLoadDecks();
+      if(result.success){
+        const byId=new Map(decks.map(deck=>[deck.id,deck]));
+        result.decks.map(normalizeDeck).filter(Boolean).forEach(remote=>{
+          const local=byId.get(remote.id);
+          if(!local || Date.parse(remote.updatedAt)>=Date.parse(local.updatedAt))
+            byId.set(remote.id,remote);
+        });
+        decks=Array.from(byId.values());
+        localStorage.setItem(deckStorageKey,JSON.stringify(decks));
+        renderDecks();
+        const saves=await Promise.all(decks.map(deck=>window.firebaseSaveDeck(deck)));
+        if(saves.some(save=>!save.success))
+          console.warn("一部のデッキをクラウドに同期できませんでした。");
+      }else{
+        console.warn("クラウドのデッキ読み込みに失敗しました。",result.message);
+      }
+    }
+
   }else{
+
+    authStatus.textContent="未ログイン";
+    authStatus.classList.remove("account-label");
+    logoutButton.style.display="none";
 
     loginScreen.classList.add("active");
 
