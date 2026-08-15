@@ -2166,7 +2166,7 @@ function renderDbImagePreview(){
 }
 
 
-function searchCardCatalog(){
+function searchCardCatalogLegacy(){
 
   const input =
     document.getElementById(
@@ -2956,3 +2956,8 @@ document.addEventListener(
 // この画面へ反映
 window.updateFirebaseAuthUI =
   updateFirebaseAuthUI;
+
+</script>
+<script type="module" src="firebase-auth.js"></script>
+</body>
+</html>
