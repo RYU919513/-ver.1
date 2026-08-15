@@ -142,20 +142,29 @@ window.firebaseSaveDeck = async function(deck) {
   }
 
   try {
+    const normalized = window.DMDeckCore?.normalizeDeck(deck);
+
+    if (!normalized || !normalized.id || normalized.id.includes("/")) {
+      return {
+        success: false,
+        message: "保存するデッキの形式が不正です。"
+      };
+    }
+
     const deckRef = doc(
       db,
       "users",
       user.uid,
       "decks",
-      deck.id
+      normalized.id
     );
 
     await setDoc(deckRef, {
-      id: deck.id,
-      name: deck.name,
-      cards: deck.cards || [],
-      updatedAt: deck.updatedAt || new Date().toISOString(),
-      schemaVersion: 1
+      id: normalized.id,
+      name: normalized.name,
+      cards: normalized.cards,
+      updatedAt: normalized.updatedAt,
+      schemaVersion: normalized.schemaVersion
     });
 
     return {
@@ -204,7 +213,8 @@ window.firebaseLoadDecks = async function() {
         id: data.id || docSnapshot.id,
         name: data.name || "無題のデッキ",
         cards: Array.isArray(data.cards) ? data.cards : [],
-        updatedAt: data.updatedAt || "1970-01-01T00:00:00.000Z"
+        updatedAt: data.updatedAt || "1970-01-01T00:00:00.000Z",
+        schemaVersion: Number.isInteger(data.schemaVersion) ? data.schemaVersion : 1
       });
     });
 

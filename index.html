@@ -586,6 +586,16 @@
           onchange="importDeckFile(event)" />
       </label>
 
+      <button class="light" onclick="exportDeckBackup()">
+        全デッキをバックアップ
+      </button>
+
+      <label class="file-button">
+        バックアップを復元
+        <input type="file" accept="application/json,.json"
+          onchange="restoreDeckBackup(event)" />
+      </label>
+
     </div>
 
   </div>
@@ -667,6 +677,10 @@
         0
       </span>
       / 40枚
+    </div>
+
+    <div id="deckLegality" class="notice" style="margin-top:10px;">
+      デッキの合法性を確認しています。
     </div>
 
   </div>
@@ -1064,6 +1078,7 @@
 </dialog>
 
 
+<script src="deck-core.js"></script>
 <script>
 
 const DECKS_KEY="dm_decks_v4";
@@ -1172,24 +1187,7 @@ function saveDecks(){
 
 
 function normalizeDeck(raw){
-
-  if(!raw || typeof raw!=="object") return null;
-
-  const cards=Array.isArray(raw.cards)
-    ? raw.cards
-      .map(item=>({
-        cardId:String(item?.cardId||item?.card?.id||""),
-        qty:Number(item?.qty)||0
-      }))
-      .filter(item=>item.cardId && item.qty>0)
-    : [];
-
-  return {
-    id:String(raw.id||"d_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
-    name:String(raw.name||raw.deckName||"無題のデッキ"),
-    cards,
-    updatedAt:String(raw.updatedAt||new Date().toISOString())
-  };
+  return window.DMDeckCore.normalizeDeck(raw);
 
 }
 
@@ -1395,12 +1393,7 @@ function renderDecks(){
 
 
 function getDeckTotal(deck){
-
-  return deck.cards.reduce(
-    (sum,item)=>
-      sum+(Number(item.qty)||0),
-    0
-  );
+  return window.DMDeckCore.getDeckTotal(deck);
 
 }
 
@@ -1485,6 +1478,13 @@ function renderDeck(){
     "deckCount"
   ).textContent=
     getDeckTotal(deck);
+
+  const legality=window.DMDeckCore.validateDeck(deck,cardDatabase);
+  const legalityBox=document.getElementById("deckLegality");
+  const messages=[...legality.errors,...legality.warnings];
+  legalityBox.textContent=legality.ok && !messages.length
+    ? "合法性チェック: 問題は見つかりませんでした。"
+    : `合法性チェック: ${messages.map(issue=>issue.message).join(" / ")}`;
 
   box.innerHTML="";
 
@@ -2793,6 +2793,38 @@ async function importDeckFile(event){
     event.target.value="";
   }
 
+}
+
+
+function exportDeckBackup(){
+  const backup=window.DMDeckCore.createBackup(decks);
+  downloadText(
+    `dm-decks-backup-${new Date().toISOString().slice(0,10)}.json`,
+    JSON.stringify(backup,null,2)
+  );
+}
+
+
+async function restoreDeckBackup(event){
+  const file=event.target.files?.[0];
+  if(!file) return;
+  try{
+    const restored=window.DMDeckCore.parseBackup(await file.text());
+    decks=window.DMDeckCore.mergeDecks(decks,restored);
+    localStorage.setItem(deckStorageKey,JSON.stringify(decks));
+    if(window.currentFirebaseUser && window.firebaseSaveDeck){
+      const results=await Promise.all(restored.map(deck=>window.firebaseSaveDeck(deck)));
+      if(results.some(result=>!result.success))
+        throw new Error("端末には復元しましたが、一部をクラウドへ保存できませんでした。");
+    }
+    renderDecks();
+    alert(`${restored.length}件のデッキを復元しました。`);
+  }catch(error){
+    console.error("バックアップ復元エラー:",error);
+    alert(error.message||"バックアップを復元できませんでした。");
+  }finally{
+    event.target.value="";
+  }
 }
 
 
