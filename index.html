@@ -1069,7 +1069,8 @@
 const DECKS_KEY="dm_decks_v4";
 const DECKS_MIGRATION_KEY="dm_decks_v4_migrated";
 const DB_NAME="dm_card_database";
-const DB_VERSION=1;
+// Version 2 shares the database with the safe import/audit administration UI.
+const DB_VERSION=2;
 const STORE_NAME="cards";
 
 let deckStorageKey=DECKS_KEY;
@@ -1972,6 +1973,14 @@ function showCardDetail(cardId){
             }
           );
 
+        }
+
+        if(!db.objectStoreNames.contains("importStaging")){
+          db.createObjectStore("importStaging",{keyPath:"importId"});
+        }
+
+        if(!db.objectStoreNames.contains("importAudits")){
+          db.createObjectStore("importAudits",{keyPath:"importId"});
         }
 
       };
