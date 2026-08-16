@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>カードインポート管理</title>
+  <style>
+    :root{font-family:system-ui,sans-serif;color:#18212f;background:#f3f5f8;--blue:#155eef;--danger:#b42318}*{box-sizing:border-box}
+    body{margin:0}header,main{max-width:1200px;margin:auto;padding:16px}header{background:#14213d;color:white;max-width:none}header div{max-width:1168px;margin:auto}h1{font-size:1.35rem;margin:.2rem 0}h2{font-size:1.1rem}
+    .steps{display:flex;overflow-x:auto;gap:6px;padding:12px 0;list-style:none}.steps li{min-width:max-content;padding:8px 12px;border-radius:99px;background:#dce2ea}.steps .active{background:var(--blue);color:#fff}.steps .done{background:#067647;color:white}
+    section{background:white;border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 3px #0002}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+    button,input,select{min-height:44px;font:inherit;border:1px solid #98a2b3;border-radius:8px;padding:9px}button{cursor:pointer;background:white;font-weight:650}button.primary{background:var(--blue);color:white;border-color:var(--blue)}button.danger{color:var(--danger);border-color:var(--danger)}button:disabled{opacity:.45;cursor:not-allowed}
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.summary{display:flex;flex-wrap:wrap;gap:6px}.pill{padding:5px 9px;border-radius:99px;background:#eee}.new{background:#d1fadf}.match{background:#e4e7ec}.update{background:#d1e9ff}.duplicate{background:#fef0c7}.conflict,.invalid{background:#fee4e2}.review{background:#fef7c3}
+    .table-wrap{overflow:auto;max-height:55vh;border:1px solid #ddd;border-radius:8px}table{border-collapse:collapse;width:100%;min-width:820px}th,td{padding:9px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#f8fafc;z-index:1}.diff{font-size:.85rem;margin:4px 0}.old{color:#b42318;text-decoration:line-through}.next{color:#067647}.errors{color:var(--danger)}.warnings{color:#854a0e}
+    #message{padding:10px;border-radius:8px;background:#eef4ff}details{margin-top:6px}code{word-break:break-all}dialog{border:0;border-radius:12px;max-width:460px;width:calc(100% - 32px)}
+    @media(max-width:600px){header,main{padding:12px}section{padding:12px}.table-wrap{max-height:65vh}button{flex:1 1 140px}.file{width:100%}}
+  </style>
+</head>
+<body><header><div><h1>カードインポート管理</h1><small>未承認・ERRORはmasterへ反映されません。反映後もimportId単位で復元できます。</small></div></header>
+<main>
+  <ol class="steps" id="steps"><li class="active">1 ファイル選択</li><li>2 解析</li><li>3 ステージング</li><li>4 検証</li><li>5 差分確認</li><li>6 承認</li><li>7 反映</li><li>8 結果確認</li></ol>
+  <p id="message" role="status" aria-live="polite">JSONまたはCSVを選択してください。</p>
+  <section><h2>1. ファイルと出典</h2><div class="grid"><input class="file" id="file" type="file" accept=".json,.csv,application/json,text/csv"><input id="source" placeholder="出典（必須、例: 公式サイトURL）"><button class="primary" id="parse">解析してステージング保存</button></div><small>インポートによってverifiedへ自動昇格しません。入力データの確認状態を維持します。</small></section>
+  <section><div class="toolbar"><h2>2. 検証・差分・承認</h2><button id="approveSelected" disabled>選択を承認</button><button id="unapproveSelected" disabled>選択の承認解除</button><button id="apply" class="primary" disabled>承認分をmasterへ反映</button></div><div id="summary" class="summary"></div><div class="table-wrap"><table><thead><tr><th><input id="all" type="checkbox" aria-label="全選択"></th><th>状態</th><th>カード</th><th>verificationStatus</th><th>旧値 → 新値 / 検証結果</th><th>承認</th></tr></thead><tbody id="rows"><tr><td colspan="6">未解析です。</td></tr></tbody></table></div></section>
+  <section><div class="toolbar"><h2>3. 監査・ロールバック・エクスポート</h2><button id="refresh">一覧更新</button><button id="export" disabled>安全なverifiedデータをJSON出力</button></div><div class="table-wrap"><table><thead><tr><th>importId / source / filename</th><th>日時 / hash</th><th>件数</th><th>状態</th><th>操作</th></tr></thead><tbody id="audits"><tr><td colspan="5">反映履歴はありません。</td></tr></tbody></table></div></section>
+  <p><a href="index.html">← 本アプリのカード検索へ</a></p>
+</main>
+<dialog id="confirm"><form method="dialog"><h2>ロールバック確認</h2><p id="confirmText"></p><div class="toolbar"><button value="cancel">中止</button><button class="danger" value="ok">元の状態へ戻す</button></div></form></dialog>
+<script src="card-validator.js"></script><script src="card-import.js"></script>
+<script>
+(() => { "use strict";
+  const $ = id => document.getElementById(id); let staged = null; let auditList = [];
+  const labels={new:"新規",match:"完全一致",update:"更新候補",duplicate:"重複",conflict:"競合",invalid:"不正",review:"要確認"};
+  function say(text){$("message").textContent=text} function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+  function step(n){[...$("steps").children].forEach((x,i)=>{x.className=i<n-1?"done":i===n-1?"active":""})}
+  function render(){if(!staged)return; const counts={};staged.entries.forEach(x=>counts[x.status]=(counts[x.status]||0)+1);$("summary").innerHTML=Object.keys(labels).map(k=>`<span class="pill ${k}">${labels[k]}: ${counts[k]||0}</span>`).join("");
+    $("rows").innerHTML=staged.entries.map((x,i)=>`<tr><td><input class="pick" data-i="${i}" type="checkbox"></td><td><span class="pill ${x.status}">${labels[x.status]}</span></td><td><b>${esc(x.card?.name||"(名称なし)")}</b><br><code>${esc(x.card?.id||"")}</code></td><td>${esc(x.card?.verificationStatus||"未設定")}</td><td>${x.changes.map(d=>`<div class="diff"><b>${esc(d.field)}</b>: <span class="old">${esc(JSON.stringify(d.oldValue))}</span> → <span class="next">${esc(JSON.stringify(d.newValue))}</span></div>`).join("")||"差分なし"}<div class="errors">${x.errors.map(esc).join(" / ")}</div><div class="warnings">${x.warnings.map(esc).join(" / ")}</div></td><td>${x.approved?"承認済み":"保留"}${x.errors.length?"（承認不可）":""}</td></tr>`).join("");
+    $("approveSelected").disabled=$("unapproveSelected").disabled=false;$("apply").disabled=!staged.entries.some(x=>x.approved&&!x.errors.length&&!['conflict','duplicate'].includes(x.status));}
+  function selected(){return [...document.querySelectorAll(".pick:checked")].map(x=>Number(x.dataset.i))}
+  $("all").onchange=e=>document.querySelectorAll(".pick").forEach(x=>x.checked=e.target.checked);
+  $("approveSelected").onclick=()=>{selected().forEach(i=>{const x=staged.entries[i];if(!x.errors.length&&!['conflict','duplicate'].includes(x.status))x.approved=true});step(6);render();say("安全な選択項目を承認しました。競合・重複・ERRORは保留されます。");};
+  $("unapproveSelected").onclick=()=>{selected().forEach(i=>staged.entries[i].approved=false);render();say("選択項目の承認を解除しました。");};
+  $("parse").onclick=async()=>{try{const file=$("file").files[0];if(!file)throw Error("ファイルを選択してください。");const source=$("source").value.trim();if(!source)throw Error("監査用の出典を入力してください。");step(2);const text=await file.text(),kind=file.name.toLowerCase().endsWith(".csv")?"csv":"json",cards=CardImport.parse(text,kind),master=await CardImport.cards();cards.forEach(c=>{if(!c.source)c.source=source;if(!c.verificationStatus)c.verificationStatus="needs_verification"});const entries=CardImport.stage(cards,master,window.validateCardDatabase);const now=new Date().toISOString();staged={importId:`import-${Date.now()}-${Math.random().toString(36).slice(2,7)}`,source,filename:file.name,importedAt:now,recordCount:cards.length,errorCount:entries.reduce((n,x)=>n+x.errors.length,0),warningCount:entries.reduce((n,x)=>n+x.warnings.length,0),originalHash:await CardImport.hash(text),entries};step(3);await CardImport.saveStaging(staged);step(5);render();say(`${cards.length}件を解析・ステージング・検証しました。差分を確認して承認してください。`)}catch(e){say(`処理できません: ${e.message}`)}};
+  $("apply").onclick=async()=>{try{const a=await CardImport.apply(staged);step(8);say(`${a.appliedCount}件を反映しました。importId: ${a.importId}`);staged=null;await loadAudits()}catch(e){say(e.message)}};
+  async function loadAudits(){auditList=(await CardImport.audits()).sort((a,b)=>b.importedAt.localeCompare(a.importedAt));$("audits").innerHTML=auditList.map((a,i)=>`<tr><td><code>${esc(a.importId)}</code><br>${esc(a.source)}<br>${esc(a.filename)}</td><td>${esc(a.importedAt)}<br><code>${esc(a.originalHash)}</code></td><td>入力 ${a.recordCount}<br>承認 ${a.approvedCount} / 反映 ${a.appliedCount}<br>ERROR ${a.errorCount} / WARNING ${a.warningCount}</td><td>${a.rollbackStatus==='rolled_back'?'ロールバック済み':'反映中'}</td><td><button class="rollback danger" data-i="${i}" ${a.rollbackStatus==='rolled_back'?'disabled':''}>ロールバック</button><button class="oneExport" data-i="${i}">JSON</button></td></tr>`).join("")||'<tr><td colspan="5">反映履歴はありません。</td></tr>';$("export").disabled=!auditList.some(a=>CardImport.exportable(a).length);}
+  async function download(cards,name){const blob=new Blob([JSON.stringify(cards,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+  $("audits").onclick=async e=>{const i=e.target.dataset.i;if(i==null)return;const a=auditList[Number(i)];if(e.target.classList.contains("oneExport")){const data=CardImport.exportable(a);if(!data.length)return say("正式出力できる承認済み・出典確認済みデータがありません。");download(data,`${a.importId}.json`)}if(e.target.classList.contains("rollback")){const d=$("confirm");$("confirmText").textContent=`${a.importId} の ${a.appliedCount}件を元に戻します。続行しますか？`;d.showModal();d.onclose=async()=>{if(d.returnValue==='ok'){try{await CardImport.rollback(a.importId);say("ロールバック完了。カード・監査情報を更新しました。");await loadAudits()}catch(err){say(err.message)}}}}};
+  $("export").onclick=()=>download(auditList.flatMap(CardImport.exportable),`verified-imports-${new Date().toISOString().slice(0,10)}.json`);$("refresh").onclick=loadAudits;loadAudits().catch(e=>say(e.message));
+})();
+</script></body></html>
