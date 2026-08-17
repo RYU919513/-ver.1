@@ -1,0 +1,12 @@
+{
+  "name": "duel-masters-deck-manager",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check": "node --check card-import.js && node --check card-validator.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
