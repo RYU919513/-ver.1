@@ -1,0 +1,45 @@
+name: Agent task
+description: A bounded, reviewable DUELIX CFL task for Codex, Copilot, or a human
+title: "[Task]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Do not use vague requests. One task must have one executor and one base commit."
+  - type: input
+    id: application
+    attributes: {label: Application, value: "DUELIX CFL"}
+    validations: {required: true}
+  - type: dropdown
+    id: executor
+    attributes: {label: Assigned executor, options: [CODEX, COPILOT, HUMAN]}
+    validations: {required: true}
+  - type: input
+    id: base
+    attributes: {label: Base commit, description: "Full commit SHA from which work starts"}
+    validations: {required: true}
+  - type: textarea
+    id: purpose
+    attributes: {label: Purpose and background}
+    validations: {required: true}
+  - type: textarea
+    id: scope
+    attributes: {label: Changed areas and explicit non-goals}
+    validations: {required: true}
+  - type: textarea
+    id: acceptance
+    attributes: {label: Success and acceptance criteria}
+    validations: {required: true}
+  - type: textarea
+    id: tests
+    attributes: {label: Expected tests}
+    validations: {required: true}
+  - type: textarea
+    id: safety
+    attributes: {label: Safety constraints, description: "Firebase/Firestore, DATA/CARD DB, PWA/Server impacts and human approval"}
+    validations: {required: true}
+  - type: textarea
+    id: links
+    attributes: {label: Related Issue/PR and known limitations}
+  - type: textarea
+    id: reproduction
+    attributes: {label: Bug reproduction, description: "For bugs: conditions, reproducibility, and exact steps"}

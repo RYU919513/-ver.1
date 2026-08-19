@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 2,
+  "application": "DUELIX CFL",
+  "activeExecutor": "NONE",
+  "taskOwner": "",
+  "taskId": "github-copilot-collaboration-complete",
+  "relatedIssue": null,
+  "relatedPR": null,
+  "baseCommit": "915d8693161fbbbb991d729c7d2edcc016e16519",
+  "targetBranch": "work",
+  "lastReviewedCommit": null,
+  "copilotStatus": "NOT_VERIFIED",
+  "githubSyncStatus": "REMOTE_NOT_CONFIGURED"
+}

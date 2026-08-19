@@ -1,0 +1,29 @@
+name: Bug report
+description: Auditable DUELIX CFL defect report
+title: "[Bug]: "
+body:
+  - type: input
+    id: application
+    attributes: {label: Application, value: "DUELIX CFL"}
+    validations: {required: true}
+  - type: textarea
+    id: symptom
+    attributes: {label: Symptom and impact}
+    validations: {required: true}
+  - type: textarea
+    id: reproduce
+    attributes: {label: Conditions, reproducibility, and steps}
+    validations: {required: true}
+  - type: textarea
+    id: analysis
+    attributes: {label: Cause and affected scope}
+  - type: textarea
+    id: fix
+    attributes: {label: Before, after, proposed fix, and regression test}
+  - type: textarea
+    id: prevention
+    attributes: {label: Prevention, other-feature impact, limitations, and human check}
+  - type: textarea
+    id: safety
+    attributes: {label: Data and production safety impacts}
+    validations: {required: true}

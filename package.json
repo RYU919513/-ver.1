@@ -4,7 +4,14 @@
   "private": true,
   "scripts": {
     "check": "node --check card-import.js && node --check card-validator.js",
-    "test": "node --test"
+    "test": "node --test",
+    "codex:start": "node scripts/codex-workflow.js start",
+    "codex:check": "node scripts/codex-workflow.js check",
+    "codex:end": "node scripts/codex-workflow.js end",
+    "codex:checkpoint": "node scripts/codex-workflow.js checkpoint",
+    "codex:handoff:create": "node scripts/codex-workflow.js handoff-create",
+    "codex:handoff:verify": "node scripts/codex-workflow.js handoff-verify",
+    "codex:handoff:restore": "node scripts/codex-workflow.js handoff-restore"
   },
   "engines": {
     "node": ">=20"

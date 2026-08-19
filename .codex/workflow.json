@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "application": "DUELIX CFL",
+  "package": "duel-masters-deck-manager",
+  "commands": {
+    "start": "npm run codex:start",
+    "check": "npm run codex:check",
+    "end": "npm run codex:end",
+    "handoffCreate": "npm run codex:handoff:create",
+    "handoffVerify": "npm run codex:handoff:verify",
+    "handoffRestore": "npm run codex:handoff:restore"
+  },
+  "productionWrites": false
+}
