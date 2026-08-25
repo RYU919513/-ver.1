@@ -1,0 +1,6 @@
+{
+  "schemaVersion": "duelix-special-print-catalog-v1",
+  "enabled": false,
+  "notes": "金トレジャー・シークレット・プロモ等は後から正式確認済みデータだけ追加する。架空カードを入れない。weightは抽選重みであり、未決定の間は0または未登録にする。",
+  "variants": []
+}
