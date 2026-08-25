@@ -5,7 +5,8 @@
   "range": [689, 1310],
   "sourceArchive": "DUELIX_CFL_カード回収_完全まとめ_Batch001-024.zip",
   "sourceArchiveSha256": "e08163b44b3fefa7ab30266b9244aeeab7d65684efc0d452167104e6b250d461",
-  "encryptedFile": "card-vault.enc.json",
+  "metadataFile": "card-vault.meta.json",
+  "ciphertextParts": 5,
   "security": "AES-256-GCM + PBKDF2-SHA256; passphrase is not stored in repository",
   "activeDataWarning": "verification_status and blank official_text are preserved; vault does not upgrade data quality by itself."
 }
