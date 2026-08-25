@@ -1,0 +1,1 @@
+Card Vault ciphertext is split across card-vault.ct.01.txt through card-vault.ct.05.txt. The decryption passphrase must never be committed to this repository.
