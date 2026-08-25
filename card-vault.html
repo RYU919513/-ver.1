@@ -23,12 +23,13 @@
 <div id="results" class="panel" hidden></div>
 </main>
 <script src="card-vault.js"></script>
+<script src="card-vault-data.js"></script>
 <script>
 let payload=null;
 const $=id=>document.getElementById(id);
 function esc(v){return String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));}
 function render(){if(!payload)return;const q=$('query').value.trim().toLowerCase();const matches=payload.records.filter(r=>!q||[r.official_name,r.candidate_name,r.official_id,r.printing_id].some(v=>String(v??'').toLowerCase().includes(q))).slice(0,200);$('shown').textContent=matches.length;$('results').innerHTML=matches.map(r=>`<div class="card"><div class="name">${esc(r.official_name||r.candidate_name||'名称未確認')} <span class="pill">No.${esc(r.collection_no)}</span></div><div class="meta">${esc(r.official_id)} / ${esc(r.printing_id)} / ${esc(r.verification_status)}</div><div class="text">${esc(r.official_text||'能力テキスト：未収録')}</div></div>`).join('')||'<p class="muted">該当なし</p>';}
-$('unlock').onclick=async()=>{const status=$('status');status.className='muted';status.textContent='解除中…';try{const c=await fetch('data/card-vault.enc.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('暗号化ファイルを取得できません。');return r.json();});payload=await DuelixCardVault.decryptVault(c,$('passphrase').value);$('passphrase').value='';status.className='ok';status.textContent=`解除成功：${payload.recordCount}件 / No.${payload.range[0]}〜${payload.range[1]}`;$('tools').hidden=false;$('results').hidden=false;$('total').textContent=payload.recordCount;render();}catch(e){status.className='bad';status.textContent=e.message;}};
+$('unlock').onclick=async()=>{const status=$('status');status.className='muted';status.textContent='解除中…';try{const c=await DuelixCardVaultData.loadEncryptedContainer();payload=await DuelixCardVault.decryptVault(c,$('passphrase').value);$('passphrase').value='';status.className='ok';status.textContent=`解除成功：${payload.recordCount}件 / No.${payload.range[0]}〜${payload.range[1]}`;$('tools').hidden=false;$('results').hidden=false;$('total').textContent=payload.recordCount;render();}catch(e){status.className='bad';status.textContent=e.message;}};
 $('query').addEventListener('input',render);
 $('export').onclick=()=>{if(!payload)return;const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DUELIX_CFL_card_vault_unlocked.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 </script></body></html>
