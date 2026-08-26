@@ -2,7 +2,8 @@
   'use strict';
   const SUPPORTED = new Set(['SECRET','GOLD_TREASURE','PROMO','SPECIAL','ART_VARIANT']);
   function validateCatalog(catalog) {
-    if (!catalog || !Array.isArray(catalog.variants)) return { ok:false, reason:'variants配列がありません。' };
+    if (!catalog || !Array.isArray(catalog.variants)) return { ok:false, reason:'variants配列がありません。', eligible:[] };
+    if (catalog.enabled !== true) return { ok:false, reason:'特殊版ガチャは現在無効です。', eligible:[] };
     const eligible = catalog.variants.filter(v => v && SUPPORTED.has(v.variantType) && Number(v.weight) > 0 && v.id && v.name);
     return { ok:true, eligible };
   }
