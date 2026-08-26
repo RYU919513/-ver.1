@@ -1,0 +1,28 @@
+{
+  "format": "DUELIX-CARD-VAULT",
+  "version": 1,
+  "compression": "gzip",
+  "kdf": {
+    "name": "PBKDF2",
+    "hash": "SHA-256",
+    "iterations": 310000,
+    "salt": "zDgScY88jvhyxOj89kzuWg=="
+  },
+  "cipher": {
+    "name": "AES-GCM",
+    "iv": "q9bA2uHYNNbnHQ1W",
+    "aad": "duelix-card-vault-v1-gzip"
+  },
+  "plaintextSha256": "8ad198892348bce5220c061f4c24174f78d75397d2fca3859e19c092e46b2c8b",
+  "compressedSha256": "9e13d7df36609cc5f5678d099d5820f3b3883cff846267ca372eb3d2c7802680",
+  "recordCount": 622,
+  "range": [689, 1310],
+  "sourceArchiveSha256": "e08163b44b3fefa7ab30266b9244aeeab7d65684efc0d452167104e6b250d461",
+  "ciphertextParts": [
+    "card-vault.ct.01.txt",
+    "card-vault.ct.02.txt",
+    "card-vault.ct.03.txt",
+    "card-vault.ct.04.txt",
+    "card-vault.ct.05.txt"
+  ]
+}

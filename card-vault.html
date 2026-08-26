@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DUELIX CFL Card Vault</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#171717;background:#f4f5f7}body{margin:0}main{max-width:980px;margin:auto;padding:18px}.panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px #0000000d}h1{font-size:22px}input,button{font:inherit;padding:11px;border-radius:10px;border:1px solid #cbd5e1}input{width:100%;box-sizing:border-box}button{background:#171717;color:#fff;cursor:pointer}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 220px}.muted{color:#64748b;font-size:13px}.ok{color:#166534}.bad{color:#b91c1c}.card{border-top:1px solid #e5e7eb;padding:12px 0}.card:first-child{border-top:0}.name{font-weight:800}.meta{font-size:12px;color:#475569;margin-top:4px}.text{white-space:pre-wrap;font-size:13px;line-height:1.55;margin-top:8px}.pill{display:inline-block;border:1px solid #cbd5e1;border-radius:999px;padding:2px 7px;font-size:11px;margin-left:4px}a{color:#1d4ed8}</style>
+</head>
+<body><main>
+<div class="panel">
+<h1>🔐 DUELIX CFL Card Vault</h1>
+<p class="muted">カード回収MASTERを暗号化してGitHubへ保存し、解除キーを知っている利用者だけがブラウザ内で復号します。解除キーはGitHubへ保存されません。</p>
+<label>解除キー</label>
+<div class="row"><input id="passphrase" type="password" autocomplete="off" placeholder="DUELIX-…"><button id="unlock">保管庫を開く</button></div>
+<p id="status" class="muted">未解除</p>
+</div>
+<div id="tools" class="panel" hidden>
+<div class="row"><input id="query" placeholder="カード名 / 公式ID / Printing ID で検索"><button id="export">解除済みJSONを書き出す</button></div>
+<p class="muted">表示中 <span id="shown">0</span> / <span id="total">0</span> 件。確認状態は元データをそのまま保持します。能力が未回収のカードは空欄のままです。</p>
+<p><a href="import-admin.html">カードインポート管理を開く</a> ｜ <a href="gacha.html">特殊版ガチャ基盤を開く</a></p>
+</div>
+<div id="results" class="panel" hidden></div>
+</main>
+<script src="card-vault.js"></script>
+<script src="card-vault-data.js"></script>
+<script>
+let payload=null;
+const $=id=>document.getElementById(id);
+function esc(v){return String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));}
+function render(){if(!payload)return;const q=$('query').value.trim().toLowerCase();const matches=payload.records.filter(r=>!q||[r.official_name,r.candidate_name,r.official_id,r.printing_id].some(v=>String(v??'').toLowerCase().includes(q))).slice(0,200);$('shown').textContent=matches.length;$('results').innerHTML=matches.map(r=>`<div class="card"><div class="name">${esc(r.official_name||r.candidate_name||'名称未確認')} <span class="pill">No.${esc(r.collection_no)}</span></div><div class="meta">${esc(r.official_id)} / ${esc(r.printing_id)} / ${esc(r.verification_status)}</div><div class="text">${esc(r.official_text||'能力テキスト：未収録')}</div></div>`).join('')||'<p class="muted">該当なし</p>';}
+$('unlock').onclick=async()=>{const status=$('status');status.className='muted';status.textContent='解除中…';try{const c=await DuelixCardVaultData.loadEncryptedContainer();payload=await DuelixCardVault.decryptVault(c,$('passphrase').value);$('passphrase').value='';status.className='ok';status.textContent=`解除成功：${payload.recordCount}件 / No.${payload.range[0]}〜${payload.range[1]}`;$('tools').hidden=false;$('results').hidden=false;$('total').textContent=payload.recordCount;render();}catch(e){status.className='bad';status.textContent=e.message;}};
+$('query').addEventListener('input',render);
+$('export').onclick=()=>{if(!payload)return;const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DUELIX_CFL_card_vault_unlocked.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
+</script></body></html>
